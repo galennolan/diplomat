@@ -36,7 +36,7 @@
                 <td>{{ $cust->nama_provinsi}}</td>
                 <td>{{ $cust->no_hp}}</td>
                 <td>{{ $cust->namasales}}</td>
-                <td align="center"><a href="{{route('customer.edit',[$cust->id])}}" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm">
+                <td align="center"><a href="{{route('customer.edit',[$cust->idcust])}}" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm">
                 <i class="fas fa-edit fa-sm text-white-50"></i> Edit</a>
                 <a href="#" onclick="return confirm('Yakin Ingin menghapus data?')" class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
                 <i class="fas fa-trash-alt fa-sm text-white-50"></i> Hapus</a>

@@ -24,15 +24,16 @@ class CustomerController extends Controller
     public function prodfunct(){
         $customer = DB::table('customer')
         ->leftJoin('kabupaten','kabupaten.id', '=','customer.id_kabupaten')
-		->leftJoin('provinsi','provinsi.id', '=','customer.id_provinsi')
+        ->leftJoin('provinsi','provinsi.id', '=','customer.id_provinsi')
         ->select('*')
         ->selectRaw('users.name as namasales,customer.name as namacust')
-        ->leftJoin('users','users.id', '=','customer.id_user')->get();
-        $kabupaten=Kabupaten::all();
-		$Provinsi=Provinsi::all();//get data from table
-		return view('customer.index',compact('Provinsi','kabupaten','customer'));//sent data to view
-
-	}
+        ->selectRaw('users.id as idsales,customer.id as idcust')
+        ->leftJoin('users','users.id', '=','customer.id_user')
+        ->get();
+        $kabupaten = Kabupaten::all();
+        $Provinsi = Provinsi::all();//get data from table
+        return view('customer.index', compact('Provinsi', 'kabupaten', 'customer'));//sent data to view
+    }
 
 	public function findProductName(Request $request){
 
