@@ -79,24 +79,24 @@
                 </a>                     
             </li>
                     <!-- Nav Item - Pages Collapse Menu -->
-            <!-- <li class="nav-item">
+              @role('admin')
+             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
                     aria-expanded="true" aria-controls="collapsePages">
                     <i class="fas fa-fw fa-folder-open"></i>
-                    <span>Data Master</span>
+                    <span>  ADMIN</span>
                 </a>
                 <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item fas fa-user" href="{{route('user.index')}}"> Master User</a>
-                        <a class="collapse-item fas fa-arrow-circle-right" href="{{route('barang.index')}}"> Master Barang</a>
+                         <a class="collapse-item fas fa-arrow-circle-right" href="{{route('barang.index')}}"> Master Barang</a>
                         <a class="collapse-item fas fa-arrow-circle-right" href="{{route('supplier.index')}}"> Master Supplier</a>
                         <a class="collapse-item fas fa-arrow-circle-right" href="{{route('akun.index')}}"> Master Akun</a>
                         <a class="collapse-item fas fa-arrow-circle-right" href="{{route('setting.transaksi')}}"> Master Setting Akun</a>
                     </div>
-                </div>
-                     
-            </li> -->
-
+                </div>     
+            </li>  
+            @endrole
             <!-- <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages1"
                     aria-expanded="true" aria-controls="collapsePages1">
@@ -183,7 +183,7 @@
                                             placeholder="Search for..." aria-label="Search"
                                             aria-describedby="basic-addon2">
                                         <div class="input-group-append">
-                                            <button class="btn btn-primary" type="button">
+                                            <button class="btn btn-danger" type="button">
                                                 <i class="fas fa-search fa-sm"></i>
                                             </button>
                                         </div>
@@ -265,7 +265,7 @@
                 </div>
                 <div class="modal-body">Pilih "Logout" apabila ingin keluar aplikasi</div>
                 <div class="modal-footer">
-                  <a class="btn btn-primary" href="{{ route('logout') }}" onclick="event.preventDefault();document.getElementById('logout-form').submit();">
+                  <a class="btn btn-danger" href="{{ route('logout') }}" onclick="event.preventDefault();document.getElementById('logout-form').submit();">
                   {{ __('Logout') }}
                   </a>
                   <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">

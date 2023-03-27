@@ -31,7 +31,7 @@ Route::get('/edit', function () {
     Route::resource('/customer','CustomerController');
     Route::get('/customer/hapus/{id}','CustomerController@destroy');
 
-    Route::resource('/customerReport','CustReportController');
+    Route::resource('/customerReport','CustomerController');
    
     Route::resource('/spgreport','SpgReportController');
 

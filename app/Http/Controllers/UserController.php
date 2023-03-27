@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Alert;
+use alert;
 use App\User;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\DB;
+use RealRashid\SweetAlert\Facades\Alert as FacadesAlert;
 
 class UserController extends Controller
 {
@@ -44,12 +45,13 @@ class UserController extends Controller
        $save_user->email=$request->get('email');
        $save_user->password=bcrypt('password');
        if($request->get('roles')=='ADMIN'){
-       $save_user->assignRole('admin');}
+             $save_user->assignRole('admin');}
        else
        {
-       $save_user->assignRole('user');}
-       $save_user->save();
-       Alert::success('Tersimpan','Data Berhasil disimpan');
+            $save_user->assignRole('user');
+        }
+         $save_user->save();
+            Alert::success('Tersimpan','Data Berhasil disimpan');
        return redirect()->route('user.index');    
        
     }
@@ -75,9 +77,12 @@ class UserController extends Controller
     public function edit($id)
     {
         $user = User::find($id);
-        $roles = Role::pluck('name','name')->all();
-        $userRole = $user->roles->pluck('name','name')->all();
+        $peran = $user->roles ;
+        $roles = Role::pluck('name')->all();
+        $userRole = $peran->pluck('name')->all();
         return view ('admin.editUser',compact('user','roles','userRole'));
+
+      
     }
 
     /**
@@ -92,7 +97,7 @@ class UserController extends Controller
         $user = User::find($id);
         DB::table('model_has_roles')->where('model_id',$id)->delete();
         $user->assignRole($request->input('role'));
-        Alert::success ('Update','Data Berhasil diupdate');
+        //Alert::success ('Update','Data Berhasil diupdate');
         return redirect()->route('user.index');
      }
 

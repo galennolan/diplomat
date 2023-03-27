@@ -13,11 +13,11 @@
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
         <thead>
         <tr align="center">
-        <th width="5%">Area</th>
-        <th width="25%">Rayon</th>
-        <th width="20%">Kab/Kec</th>
-        <th width="15%">venue</th>
-        <th width="25%">Nama Pelanggan</th>
+        <th width="5%">No</th>
+        <th width="25%">User</th>
+        <th width="20%">Email</th>
+        <th width="15%">Kode</th>
+        <th width="25%">Ubah</th>
         </tr>
         </thead>
         <tbody>
@@ -33,9 +33,9 @@
  </td>
  @endforeach
  <td align="center">
- <!-- <a href="{{route( 'user.edit',[$row->id])}}" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm">
+  <a href="{{route( 'user.edit',[$row->id])}}" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm">
     <i class="fas fa-edit fa-sm text-white-50"></i>Edit Akses
-    </a> -->
+    </a> 
  <a href="/user/hapus/{{ $row->id }}" onclick="return confirm('Yakin Ingin menghapus data?')" class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
  <i class="fas fa-trash-alt fa-sm text-white-50"></i> Hapus
  </a>
@@ -77,8 +77,8 @@
  <button type="button" class="btn btn-light" datadismiss="modal">Tutup</button>
  <button type="submit" class="btn btn-primary">Simpan</button>
  </div>
-@endsection
  </div>
  </form>
  </div>
 </div>
+@endsection
