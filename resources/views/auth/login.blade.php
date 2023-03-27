@@ -61,7 +61,7 @@
  </div>
 <div class="form-group row mb-0">
  <div class="col-md-12 offset-md-12">
- <button type="submit" class="btn btn-primary">
+ <button type="submit" class="btn btn-danger">
  {{ __('Login') }}
  </button>
  @if (Route::has('password.request'))

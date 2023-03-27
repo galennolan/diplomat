@@ -1,9 +1,17 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Barang;
-use App\User;
+
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Provinsi;
+use App\Barang;
+use App\Kabupaten;
+use App\Customer;
+use App\Users;
+use Spatie\Permission\Models\Role;
+use Alert;
+use Illuminate\Support\Facades\Auth;
 
 class CustReportController  extends Controller
 {
@@ -22,10 +30,17 @@ class CustReportController  extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index()
-    {   
-        $barang = \App\Barang::All();
-        $user = \App\User::All();
-        return view ('testaja',['barang'=>$barang,'user'=>$user]);
-    }
+    public function prodfunct(){
+        $customer = DB::table('customer')
+        ->leftJoin('kabupaten','kabupaten.id', '=','customer.id_kabupaten')
+		->leftJoin('provinsi','provinsi.id', '=','customer.id_provinsi')
+        ->select('*')
+        ->selectRaw('users.name as namasales,customer.name as namacust')
+        ->leftJoin('users','users.id', '=','customer.id_user')->get();
+        $kabupaten=Kabupaten::all();
+		$Provinsi=Provinsi::all();//get data from table
+		return view('customerreport.index',compact('Provinsi','kabupaten','customer'));//sent data to view
+
+	}
+
 }

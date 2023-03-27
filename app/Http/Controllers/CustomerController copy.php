@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 
 
 
-class CustomerController extends Controller
+class CustReportController extends Controller
 {
     public function __construct()
     {
@@ -64,36 +64,9 @@ class CustomerController extends Controller
  
         $tambah_cust->save();
         Alert::success('Pesan','Data berhasil disimpan');
-        return redirect ('/customer');
+        return redirect ('/customerReport');
     }
-
-	public function edit ($id)
-    {
-        $cust_edit=\App\Customer::findorFail($id);
-        return view ('customer.editCustomer', ['customer'=> $cust_edit]);
-
-    }
-    public function update (Request $request, $id)
-    {
-        $cust= \App\Customer::findorFail($id);
-        $cust->name = $request-> get ('name');
-        $cust->address = $request-> get ('address');
-        $cust->no_hp = $request-> get ('no_hp');
-        $cust->id_user =Auth::user()->id;
-        $cust->id_kabupaten = $request->get ('op');
-        $cust->id_provinsi = $request->get ('prod_cat_id');
-        $cust->venue = $request->get ('venue');
-        $cust->telp = $request->get ('telp');
-        $cust->jenis_kelamin = $request->get ('jenis_kelamin');
-        $cust->umur = $request->get ('umur');
-        $cust->pekerjaan = $request->get ('pekerjaan');
-        $cust->merk_rokok = $request->get ('merk_rokok');
-        $cust->jml_beli = $request->get ('jml_beli');
-        $cust -> save();
-
-        return redirect() ->route ('customer.index', [$id]);
-
-    }
+	
     
 
 }

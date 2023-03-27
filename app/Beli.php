@@ -14,4 +14,4 @@ class Beli extends Model
      protected $table = "tampil_pemesanan";
      protected $fillable=['kd_brg','no_pesan','nm_brg','qty_pesan','sub_total'];
  }
-}
+

@@ -3,13 +3,19 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-
 class Customer extends Model
 {
-    protected $primaryKey = 'kd_cust';
-    public $incrementing = false;
-    protected $keyType = 'string';
-    public $timestamps = false;
-    protected $table = "barang";
-       protected $fillable=['kd_cust','nm_brg','harga','stok'];
+    
+    
+    protected $table = "customer";
+   
+    public function provinsi()
+    {
+        return $this->hasOne('App\Provinsi', 'id','nama_provinsi');
+    }
+
+    public function kabupaten()
+    {
+        return $this->hasOne('App\Kabupaten', 'id','nama_kabupaten');
+    }
 }

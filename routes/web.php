@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CustomerController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -28,12 +30,21 @@ Route::get('/edit', function () {
     Route::resource('/barang','BarangController');
     Route::get('/barang/hapus/{id}','BarangController@destroy');
 
-    Route::resource('/customer','CustomerController');
-    Route::get('/customer/hapus/{id}','CustomerController@destroy');
+    Route::get('/customer','CustomerController@prodfunct')->name('customer');
+    Route::get('/findProductName','CustomerController@findProductName');
+    Route::post('/customer', 'CustomerController@store');
+    Route::get('/customer/{id}/edit', 'CustomerController@edit')->name('customer.edit');
+    Route::put('/customer/{id}', 'CustomerController@update')->name('customer.update');
 
-    Route::resource('/customerReport','CustomerController');
+
+
+    Route::get('/CustReport','CustReportController@prodfunct')->name('CustReport');
+    Route::get('/findProductName','CustomerController@findProductName');
+
+
    
-    Route::resource('/spgreport','SpgReportController');
+    Route::get('/spgreport','SpgReportController@index')->name('spgreport');
+    Route::get('/spgreport/penjualan', 'SpgReportController@penjualan')->name('spgreport.penjualan');
 
     Route::resource('/salesreport','SalesReportController');
 
