@@ -49,7 +49,7 @@
 <div class="row">
 <div class="col-md-6 mb-3">
   <div class="card h-100">
-<canvas class="chart" id="myChart" width="400" height="200"></canvas>
+  <canvas class="chart" id="myChart1" width="400" height="200"></canvas>
 </div>
   </div>
   <div class="col-md-6 mb-3">
@@ -214,70 +214,62 @@
 
 <script>
 var xValues = ["MALL", "WARTEG", "SC", "KANTOR", "PA"];
-var yValues = [55, 49, 44, 24, 15];
-var barColors1 = ["red", "green", "blue", "orange", "brown"];
 
-var aValues = ["18-25th", "26-30th", "31-40th", "41-50th", ">50th"];
-var bValues = [217, 1380, 203, 14, 0];
+var barColors1 = ["red", "green", "blue", "orange", "brown"];
 var barColors2 = [  'rgba(255, 99, 132, 0.5)',  'rgba(255, 159, 64, 0.5)',  'rgba(255, 205, 86, 0.5)',  'rgba(75, 192, 192, 0.5)',  'rgba(54, 162, 235, 0.5)',];
 
-new Chart("myChart", {
-  type: "bar",
-  data: {
-    labels: xValues,
-    datasets: [{
-      backgroundColor: barColors1,
-      borderColor: 'black', // Add this property to set the color of the border
-      borderWidth: 0.5, 
-      data: yValues
-    }]
-  },
-  options: {
-    legend: { display: false },
-    title: {
-      display: true,
-      text: "Venue"
-    }
-  }
-});
+var kat_umur = ["18-25th", "26-30th", "31-40th", "41-50th", ">50th"];
+var bValues = {!! json_encode($umur) !!}; // use Laravel's json_encode to convert the PHP array to a JavaScript array
+          new Chart("myChart2", {
+            type: "bar",
+            data: {
+              labels: kat_umur,
+              datasets: [{
+                backgroundColor: barColors2,
+                borderColor: 'black', // Add this property to set the color of the border
+                borderWidth: 0.5, 
+                label:'Kategori Usia',
+                data: bValues
+              }]
+            },
+            options: {
+              scales: {
+                         yAxes: [{
+                              ticks: {
+                          beginAtZero: true,
+                          stepSize: 1
+                      }
+                    }]}
+            }
+          });
 
-new Chart("myChart2", {
+// Assume the `$venues` variable contains the data from the controller
+var venues = {!! json_encode($venues) !!}; // Convert the PHP array to a JavaScript array
+
+// Extract the venue names and counts from the `venues` array
+var venueNames = venues.map(function(venue) { return venue.venue; });
+var venueCounts = venues.map(function(venue) { return venue.count; });
+
+new Chart("myChart1", {
   type: "bar",
   data: {
-    labels: aValues,
+    labels: venueNames,
     datasets: [{
       backgroundColor: barColors2,
-      borderColor: 'black', // Add this property to set the color of the border
-      borderWidth: 0.5, 
-      data: bValues
+      label: 'Tempat ditemukannya',
+      data: venueCounts
     }]
   },
   options: {
-    legend: { display: false },
-    title: {
-      display: true,
-      text: "Umur"
-    }
-  }
-});
-
-new Chart("myChart3", {
-  type: "bar",
-  data: {
-    labels: aValues,
-    datasets: [{
-      backgroundColor: barColors2,
-      data: bValues
-    }]
-  },
-  options: {
-    legend: { display: false },
-    title: {
-      display: true,
-      text: "Umur"
-    }
-  }
-});
+              scales: {
+                         yAxes: [{
+                              ticks: {
+                          beginAtZero: true,
+                          stepSize: 1
+                      }
+                    }]}
+            }
+          });
 
 new Chart("myChart4", {
   type: "bar",

@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CustomerController;
 
 
 /*
@@ -38,11 +37,9 @@ Route::get('/edit', function () {
 
 
 
-    Route::get('/CustReport','CustReportController@prodfunct')->name('CustReport');
-    Route::get('/findProductName','CustomerController@findProductName');
+    Route::get('/customerreport','CustReportController@index')->name('customerreport');
+    Route::get('/customerreport/idih', 'CustomerController@idih')->name('customerreport.idih');
 
-
-   
     Route::get('/spgreport','SpgReportController@index')->name('spgreport');
     Route::get('/spgreport/penjualan', 'SpgReportController@penjualan')->name('spgreport.penjualan');
 

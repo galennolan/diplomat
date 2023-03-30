@@ -172,8 +172,8 @@
           <script>
 
             
-          const  yValues = <?php echo $idcustomer; ?>;
-          const  barColors = [
+          var  yValues = <?php echo $idcustomer; ?>;
+          var  barColors = [
                 'rgba(255, 99, 132, 0.5)',
                 'rgba(255, 159, 64, 0.5)',
                 'rgba(255, 205, 86, 0.5)',
@@ -182,14 +182,14 @@
 
                 
                
-                const userSelect  = document.getElementById('user-select');
-                const beginDateInput = document.getElementById('tanggalawal');
-                const endDateInput = document.getElementById('tanggalakhir');
-                const locationSelect = document.getElementById('area');
-                const ctx = document.getElementById('myChart').getContext('2d');
+                var userSelect  = document.getElementById('user-select');
+                var beginDateInput = document.getElementById('tanggalawal');
+                var endDateInput = document.getElementById('tanggalakhir');
+                var locationSelect = document.getElementById('area');
+                var ctx = document.getElementById('myChart').getContext('2d');
                 
                 // Define the chart data
-                const chartData = {
+                var chartData = {
                     labels: [new Date().toLocaleDateString('en-GB')],
                     datasets: [{
                         label: 'Silahkan pilih dulu',
@@ -199,7 +199,7 @@
                 };
                 let hasData = false; // variabel untuk data kalau tidak ada 
                 
-                const myChart = new Chart(ctx, {
+                var myChart = new Chart(ctx, {
                     type: "bar",
                     data: chartData,
                       options: {
@@ -222,8 +222,8 @@
                 function updateChart() {
                 console.log(userSelect.value);
                 console.log(locationSelect.value); 
-                const beginDate = new Date(beginDateInput.value);
-                const endDate = new Date(endDateInput.value);
+                var beginDate = new Date(beginDateInput.value);
+                var endDate = new Date(endDateInput.value);
 
                 // Check if the begin date is greater than or equal to the end date
                 if (beginDate > endDate) {
@@ -236,6 +236,7 @@
                   .then(response => {
                     if (!response.ok) {
                       throw new Error(response.statusText);
+                      console.log(data);
                     }
                     return response.json();
                   })
@@ -277,7 +278,7 @@
                 Chart.plugins.register({
                   afterDraw: function(chart) {
                     if (!hasData) {
-                      const ctx = chart.chart.ctx;
+                      var ctx = chart.chart.ctx;
                       ctx.save();
                       ctx.font = "bold 16px Arial";
                       ctx.textAlign = "center";
@@ -293,9 +294,4 @@
           
           
 
-                </div>
-                <!-- /.container-fluid -->
-
-            </div>
-            <!-- End of Main Content -->
             @endsection

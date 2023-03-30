@@ -103,47 +103,6 @@ class SpgReportController  extends Controller
         // Return the sales count as a response
         return response()->json($chartData);
         
-        
-        
-        
-        
-
-        $salespilihannama = $request->input('nama_user');
-
-        if ($location === 'all') {
-            $location = null;
-        }
-        
-        // Query the sales data and count the number of sales made on a given date by the selected user
-        $jumlahpenjualanpersales = DB::table('customer')
-            ->select(DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d") AS date'), DB::raw('count(*) as jumlah_penjualan'))
-            ->where('id_user', User::where('name', $salespilihannama)->value('id'))
-            ->when($tanggalawal === $tanggalakhir, function ($query) use ($tanggalawal) {
-                return $query->whereDate('created_at', date('Y-m-d H:i:s', $tanggalawal));
-            }, function ($query) use ($tanggalawal, $tanggalakhir) {
-                return $query->whereBetween('created_at', [date('Y-m-d H:i:s', $tanggalawal), date('Y-m-d H:i:s', $tanggalakhir+ 86399)]);
-            })
-            ->when($location, function ($query, $location) {
-                return $query->where('id_kabupaten', $location);
-            })
-            ->groupBy('date')
-            ->orderBy('date', 'ASC')
-            ->get();
-        
-
-        $chartData = [
-            $labels = [],
-            $data = []
-        ];
-
-        foreach ($jumlahpenjualanpersales as $p) {
-            $chartData['labels'][] = date('d-m-Y', strtotime( $p->date)); 
-            $chartData['data'][] = $p->jumlah_penjualan;
-        }
-
-        
-        // Return the sales count as a response
-        return response()->json($chartData);
     }
 
     
