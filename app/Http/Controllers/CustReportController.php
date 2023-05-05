@@ -7,6 +7,7 @@ use App\Customer;
 use Illuminate\Http\Request;
 use DB;
 use RealRashid\SweetAlert\Facades\Alert;
+use Auth;
 
 class CustReportController  extends Controller
 {
@@ -27,88 +28,333 @@ class CustReportController  extends Controller
      */
     public function index()
     {   
-        $today = date('Y-m-d');
-        $umur = DB::table('customer')
-            ->select(DB::raw('CASE
-                    WHEN umur >= 18 AND umur <= 25 THEN "18-25th"
-                    WHEN umur >= 26 AND umur <= 30 THEN "26-30th"
-                    WHEN umur >= 31 AND umur <= 40 THEN "31-40th"
-                    WHEN umur >= 41 AND umur <= 50 THEN "41-50th"
-                    ELSE ">50th"
-                END AS kat_umur, COUNT(*) as count'))
-            ->groupBy('kat_umur')
-            ->pluck('count')
-            ->toArray();
+        $customer = \App\Customer::all();
 
-        $venues = DB::table('customer')
-            ->select('venue', DB::raw('COUNT(*) as count'))
+        $isAdminArea = Auth::user()->hasRole('adminarea');
+        $area = Auth::user()->area;
+
+        $venuerokok = DB::table('customer')
+        ->leftJoin('users', 'users.id', '=', 'customer.id_user')
+        ->whereIn('venue', ['C&B', 'KANTOR', 'PA', 'PT', 'PUSAT PEMBELANJAAN', 'SC'])
+        ->where(function ($query) {
+            $query->whereIn('rokok', ['Diplomat Mild', 'Diplomat Mild Menthol'])
+                  ->orWhereIn('rokok', ['Pro Mild', 'LA Light', 'Class Mild', 'A Mild'])
+                  ->orWhereNotIn('rokok', ['Diplomat Mild', 'Diplomat Mild Menthol', 'Pro Mild', 'LA Light', 'Class Mild', 'A Mild']);
+        })
+        ->when(Auth::user()->hasRole('adminarea'), function ($query) {
+            return $query->where('customer.area', Auth::user()->area);
+        })
+        ->select('venue', DB::raw("
+            CASE
+                WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild','Diplomat Mild', 'Diplomat Mild Menthol') THEN 
+                    CASE rokok
+                        WHEN 'Pro Mild' THEN 'Pro Mild'
+                        WHEN 'LA Light' THEN 'LA Light'
+                        WHEN 'Class Mild' THEN 'Class Mild'
+                        WHEN 'A Mild' THEN 'A Mild'
+                        WHEN 'Diplomat Mild' THEN 'Diplomat Mild'
+                        WHEN 'Diplomat Mild Menthol' THEN 'Diplomat Mild Menthol'
+                    END
+                ELSE 'Others'
+            END AS rokok"), 
+            DB::raw('COUNT(*) AS count'), 
+            DB::raw("SUM(CASE
+                WHEN rokok NOT IN ('Diplomat Mild', 'Diplomat Mild Menthol', 'Pro Mild', 'LA Light', 'Class Mild', 'A Mild') THEN 1
+                ELSE 0
+            END) AS count_others"),
+            DB::raw("COUNT(*) + SUM(CASE
+                WHEN rokok NOT IN ('Diplomat Mild', 'Diplomat Mild Menthol', 'Pro Mild', 'LA Light', 'Class Mild', 'A Mild') THEN 1
+                ELSE 0
+            END) AS count_total")
+        )
+        ->groupBy('venue', DB::raw("
+            CASE
+               
+                WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild','Diplomat Mild', 'Diplomat Mild Menthol') THEN 
+                    CASE rokok
+                        WHEN 'Pro Mild' THEN 'Pro Mild'
+                        WHEN 'LA Light' THEN 'LA Light'
+                        WHEN 'Class Mild' THEN 'Class Mild'
+                        WHEN 'A Mild' THEN 'A Mild'
+                        WHEN 'Diplomat Mild' THEN 'Diplomat Mild'
+                        WHEN 'Diplomat Mild Menthol' THEN 'Diplomat Mild Menthol'
+                    END
+                ELSE 'Others'
+            END
+        "))
+        ->orderBy('venue', 'asc')
+        ->orderBy('rokok', 'asc')
+        ->get();
+
+
+        $rokokList = $venuerokok->pluck('rokok')->unique()->sort()->values()->toArray();
+        $rokokCounts = collect($venuerokok)
+            ->groupBy('rokok')
+            ->map(function ($item) {
+                return $item->pluck('count', 'venue');
+            })
+            ->toArray();
+            
+        
+        $venue = DB::table('customer')
+        ->whereIn('venue', ['C&B', 'KANTOR', 'PA', 'PT', 'PUSAT PEMBELANJAAN', 'SC'])
+        ->where(function ($query) {
+            $query->whereIn('rokok', ['Diplomat Mild', 'Diplomat Mild Menthol'])
+                  ->orWhereIn('rokok', ['Pro Mild', 'LA Light', 'Class Mild', 'A Mild'])
+                  ->orWhereNotIn('rokok', ['Diplomat Mild', 'Diplomat Mild Menthol', 'Pro Mild', 'LA Light', 'Class Mild', 'A Mild']);
+        })
+            ->select('venue', DB::raw("
+            CASE
+               
+                WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild','Diplomat Mild', 'Diplomat Mild Menthol') THEN rokok
+                ELSE 'Others'
+            END AS rokok"), 
+            DB::raw('COUNT(*) AS count'), 
+            DB::raw("SUM(CASE
+                WHEN rokok NOT IN ('Diplomat Mild', 'Diplomat Mild Menthol', 'Pro Mild', 'LA Light', 'Class Mild', 'A Mild') THEN 1
+                ELSE 0
+            END) AS count_others"),
+            DB::raw("COUNT(*) + SUM(CASE
+                WHEN rokok NOT IN ('Diplomat Mild', 'Diplomat Mild Menthol', 'Pro Mild', 'LA Light', 'Class Mild', 'A Mild') THEN 1
+                ELSE 0
+            END) AS count_total")
+        )
+            ->leftJoin('users', 'users.id', '=', 'customer.id_user')
+            ->when(Auth::user()->hasRole('adminarea'), function ($query) {
+                              return $query->where('customer.area', Auth::user()->area);
+                          })
             ->groupBy('venue')
             ->get();
-    
-            
-
-        return view('customerreport.index', ['umur' => $umur,'venues' => $venues]);
-    }
-
-    public function idih(Request $request)
-    {
-       
-        $tanggalawal = strtotime($request->input('tanggalawal'));
-        $tanggalakhir = strtotime($request->input('tanggalakhir'));
-        $location = $request->get('location');
-
-        if (empty($tanggalawal)) {
-            // Set $tanggalawal to today if it is empty
-            $tanggalawal = strtotime(date('Y-m-d 00:00:00'));
-        }
-        
-        if (empty($tanggalakhir)) {
-            // Set $tanggalakhir to today if it is empty
-            $tanggalakhir = strtotime(date('Y-m-d 23:59:59'));
-        }
-        
-        if ($tanggalakhir < $tanggalawal) {
-            return response()->json([
-                'error' => 'Tanggal akhir harus lebih besar atau sama dengan tanggal awal'
-            ]);
-        }
-        
-        $salespilihannama = $request->input('nama_user');
-        
-        if ($location === 'all') {
-            $location = null;
-        }
-        
-        // Query the sales data and count the number of sales made on a given date by the selected user
-        $jumlahpenjualanpersales = DB::table('customer')
-            ->select(DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d") AS date'), DB::raw('count(*) as jumlah_penjualan'))
-            ->where('id_user', User::where('name', $salespilihannama)->value('id'))
-            ->when($tanggalawal === $tanggalakhir, function ($query) use ($tanggalawal) {
-                return $query->whereDate('created_at', date('Y-m-d H:i:s', $tanggalawal));
-            }, function ($query) use ($tanggalawal, $tanggalakhir) {
-                return $query->whereBetween('created_at', [date('Y-m-d H:i:s', $tanggalawal), date('Y-m-d H:i:s', $tanggalakhir+ 86399)]);
-            })
-            ->when($location, function ($query, $location) {
-                return $query->where('id_kabupaten', $location);
-            })
-            ->groupBy('date')
-            ->orderBy('date', 'ASC')
+  
+        $umur = DB::table('customer')
+            ->select('umur', DB::raw('COUNT(*) as count'), DB::raw('(SELECT SUM(count) FROM (SELECT COUNT(*) as count FROM customer GROUP BY umur) as counts) as total_count'))
+            ->leftJoin('users', 'users.id', '=', 'customer.id_user')
+        ->when(Auth::user()->hasRole('adminarea'), function ($query) {
+                              return $query->where('customer.area', Auth::user()->area);
+                          })
+            ->groupBy('umur')
             ->get();
         
-        $chartData1 = [
-            $labels = [],
-            $data = []
-        ];
+        $pekerjaan = DB::table('customer')
+        ->select('pekerjaan', DB::raw('COUNT(*) as jml_pekerjaan'))
+        ->groupBy('pekerjaan')
+        ->leftJoin('users', 'users.id', '=', 'customer.id_user')
+        ->when(Auth::user()->hasRole('adminarea'), function ($query) {
+                              return $query->where('customer.area', Auth::user()->area);
+                          })
+        ->get();
+
+        $rokoknya = ['Diplomat Mild', 'Diplomat Mild Menthol', 'Pro Mild', 'LA Light', 'Class Mild', 'A Mild'];
+
+        $merklain = DB::table('customer')
+            ->select(DB::raw("CASE WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild','Diplomat Mild', 'Diplomat Mild Menthol') THEN rokok ELSE 'Others' END as rokok"), 
+                DB::raw('COUNT(*) as count_others '))
+            ->whereIn('rokok', $rokoknya)
+            ->orWhereNotIn('rokok', $rokoknya)
+            ->leftJoin('users', 'users.id', '=', 'customer.id_user')
+            ->when(Auth::user()->hasRole('adminarea'), function ($query) {
+                return $query->where('customer.area', Auth::user()->area);
+            })
+            ->groupBy(DB::raw("
+            CASE 
+                WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild', 'Diplomat Mild', 'Diplomat Mild Menthol') THEN rokok 
+                ELSE 'Others' 
+            END,
+            CASE 
+                WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild', 'Diplomat Mild', 'Diplomat Mild Menthol') THEN rokok 
+                ELSE 'Others' 
+            END <> 'Others'
+        "))
+            ->get();
         
-        foreach ($jumlahpenjualanpersales as $p) {
-            $chartData1['labels'][] = date('d-m-Y', strtotime($p->date)); 
-            $chartData1['data'][] = $p->jumlah_penjualan;
-        }
+       
+
+
+        $rokoklain = $merklain->pluck('rokok')->toJson();
+        $JMLrokoklain = $merklain->pluck('count_others')->toJson();
+        $jmlpekerjaan = $pekerjaan->pluck('jml_pekerjaan')->toJson();
+        $namapekerjaan = $pekerjaan->pluck('pekerjaan')->toJson();
+        $jumlah = $venue->pluck('count')->toJson();
+        $tpt = $venue->pluck('venue')->toJson();
+        $countumur = $umur->pluck('count')->toJson();
+        $ss = $umur->pluck('umur')->toJson();
         
-        // Return the sales count as a response
-        return response()->json($chartData1);
+        return view('customerreport.index', compact('jmlpekerjaan','namapekerjaan','jumlah', 'tpt', 'countumur', 'ss', 'umur', 'venuerokok', 'rokokList', 'rokokCounts','rokoklain','JMLrokoklain','pekerjaan','merklain'));
         
     }
+
+        public function loadData(Request $request)
+        {
+            $customer = \App\Customer::all();
+            $area = $request->get('area');
+            $tanggalawal = date('Y-m-d H:i:s', strtotime($request->input('tanggalawal')));
+            $tanggalakhir = date('Y-m-d 23:59:59', strtotime($request->input('tanggalakhir')));
+
+            
+            $venuerokok = DB::table('customer')
+            ->leftJoin('users', 'users.id', '=', 'customer.id_user')
+            ->whereIn('venue', ['C&B', 'KANTOR', 'PA', 'PT', 'PUSAT PEMBELANJAAN', 'SC'])
+            ->where(function ($query) {
+                $query->whereIn('rokok', ['Diplomat Mild', 'Diplomat Mild Menthol'])
+                    ->orWhereIn('rokok', ['Pro Mild', 'LA Light', 'Class Mild', 'A Mild'])
+                    ->orWhereNotIn('rokok', ['Diplomat Mild', 'Diplomat Mild Menthol', 'Pro Mild', 'LA Light', 'Class Mild', 'A Mild']);
+            })
+            ->when(Auth::user()->hasRole('adminarea'), function ($query) {
+                return $query->leftJoin('users', 'users.id', '=', 'customer.id_user')
+                    ->where('customer.area', Auth::user()->area);
+            }, function ($query) use ($area) {
+                return $query->where('customer.area', '=', $area);
+            })
+            ->whereBetween('customer.created_at', [$tanggalawal, $tanggalakhir])
+            ->select('venue', DB::raw("
+            CASE
+               
+                WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild','Diplomat Mild', 'Diplomat Mild Menthol') THEN 
+                    CASE rokok
+                        WHEN 'Pro Mild' THEN 'Pro Mild'
+                        WHEN 'LA Light' THEN 'LA Light'
+                        WHEN 'Class Mild' THEN 'Class Mild'
+                        WHEN 'A Mild' THEN 'A Mild'
+                        WHEN 'Diplomat Mild' THEN 'Diplomat Mild'
+                        WHEN 'Diplomat Mild Menthol' THEN 'Diplomat Mild Menthol'
+                    END
+                ELSE 'Others'
+            END AS rokok"), 
+            DB::raw('COUNT(*) AS count'), 
+            DB::raw("SUM(CASE
+                WHEN rokok NOT IN ('Diplomat Mild', 'Diplomat Mild Menthol', 'Pro Mild', 'LA Light', 'Class Mild', 'A Mild') THEN 1
+                ELSE 0
+            END) AS count_others"),
+            DB::raw("COUNT(*) + SUM(CASE
+                WHEN rokok NOT IN ('Diplomat Mild', 'Diplomat Mild Menthol', 'Pro Mild', 'LA Light', 'Class Mild', 'A Mild') THEN 1
+                ELSE 0
+            END) AS count_total")
+        )
+        ->groupBy('venue', DB::raw("
+            CASE
+               
+                WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild','Diplomat Mild', 'Diplomat Mild Menthol') THEN 
+                    CASE rokok
+                        WHEN 'Pro Mild' THEN 'Pro Mild'
+                        WHEN 'LA Light' THEN 'LA Light'
+                        WHEN 'Class Mild' THEN 'Class Mild'
+                        WHEN 'A Mild' THEN 'A Mild'
+                        WHEN 'Diplomat Mild' THEN 'Diplomat Mild'
+                        WHEN 'Diplomat Mild Menthol' THEN 'Diplomat Mild Menthol'
+                    END
+                ELSE 'Others'
+            END
+        "))
+        ->orderBy('venue', 'asc')
+        ->orderBy('rokok', 'asc')
+        ->get();
+
+
+            $rokokList = $venuerokok->pluck('rokok')->unique()->sort()->values()->toArray();
+
+            $rokokCounts = collect($venuerokok)
+                ->groupBy('rokok')
+                ->map(function ($item) {
+                    return $item->pluck('count', 'venue');
+                })
+                ->toArray();
+
+            $venue = DB::table('customer')
+            ->whereIn('venue', ['C&B', 'KANTOR', 'PA', 'PT', 'PUSAT PEMBELANJAAN', 'SC'])
+            ->where(function ($query) {
+                $query->whereIn('rokok', ['Diplomat Mild', 'Diplomat Mild Menthol'])
+                      ->orWhereIn('rokok', ['Pro Mild', 'LA Light', 'Class Mild', 'A Mild'])
+                      ->orWhereNotIn('rokok', ['Diplomat Mild', 'Diplomat Mild Menthol', 'Pro Mild', 'LA Light', 'Class Mild', 'A Mild']);
+            })
+                ->select('venue', DB::raw("
+                CASE
+                    WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild','Diplomat Mild', 'Diplomat Mild Menthol') THEN rokok
+                    ELSE 'Others'
+                END AS rokok"), 
+                DB::raw('COUNT(*) AS count'), 
+                DB::raw("SUM(CASE
+                    WHEN rokok NOT IN ('Diplomat Mild', 'Diplomat Mild Menthol', 'Pro Mild', 'LA Light', 'Class Mild', 'A Mild') THEN 1
+                    ELSE 0
+                END) AS count_others"),
+                DB::raw("COUNT(*) + SUM(CASE
+                    WHEN rokok NOT IN ('Diplomat Mild', 'Diplomat Mild Menthol', 'Pro Mild', 'LA Light', 'Class Mild', 'A Mild') THEN 1
+                    ELSE 0
+                END) AS count_total")
+            )
+                ->when(Auth::user()->hasRole('adminarea'), function ($query) {
+                    return $query->leftJoin('users', 'users.id', '=', 'customer.id_user')
+                                ->where('customer.area', Auth::user()->area);
+                }, function ($query) use ($area) {
+                    return $query->where('area', '=', $area);
+                })
+                ->whereBetween('customer.created_at', [$tanggalawal, $tanggalakhir])
+                ->groupBy('venue')
+                ->get();
+
+            $umur = DB::table('customer')
+                ->select('umur', DB::raw('COUNT(*) as count'), DB::raw('(SELECT SUM(count) FROM (SELECT COUNT(*) as count FROM customer WHERE area = "'.$area.'" AND customer.created_at BETWEEN "'.$tanggalawal.'" AND "'.$tanggalakhir.'" GROUP BY umur) as counts) as total_count'))
+                ->when(Auth::user()->hasRole('adminarea'), function ($query) {
+                    return $query->leftJoin('users', 'users.id', '=', 'customer.id_user')
+                                ->where('customer.area', Auth::user()->area);
+                }, function ($query) use ($area) {
+                    return $query->where('area', '=', $area);
+                })
+                ->whereBetween('customer.created_at', [$tanggalawal, $tanggalakhir])
+                ->groupBy('umur')
+                ->get();
+
+            $pekerjaan = DB::table('customer')
+                ->select('pekerjaan', DB::raw('COUNT(*) as jml_pekerjaan'))
+                ->when(Auth::user()->hasRole('adminarea'), function ($query) {
+                    return $query->leftJoin('users', 'users.id', '=', 'customer.id_user')
+                                ->where('customer.area', Auth::user()->area);
+                }, function ($query) use ($area) {
+                    return $query->where('area', '=', $area);
+                })
+                ->whereBetween('customer.created_at', [$tanggalawal, $tanggalakhir])
+                ->groupBy('pekerjaan')
+                ->get();
+
+                $rokoknya = ['Diplomat Mild', 'Diplomat Mild Menthol', 'Pro Mild', 'LA Light', 'Class Mild', 'A Mild'];
+
+
+                $merklain = DB::table('customer')
+                ->select(DB::raw("CASE WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild','Diplomat Mild', 'Diplomat Mild Menthol') THEN rokok ELSE 'Others' END as rokok"), 
+                    DB::raw('COUNT(*) as count_others'))
+                ->whereBetween('customer.created_at', [$tanggalawal, $tanggalakhir])
+                ->where('customer.area', '=', $area)
+                ->where(function($query) use ($rokoknya){
+                    $query->whereIn('rokok', $rokoknya)
+                        ->orWhereNotIn('rokok', $rokoknya);
+                })
+                ->groupBy(DB::raw("
+                    CASE 
+                        WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild', 'Diplomat Mild', 'Diplomat Mild Menthol') THEN rokok 
+                        ELSE 'Others' 
+                    END,
+                    CASE 
+                        WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild', 'Diplomat Mild', 'Diplomat Mild Menthol') THEN rokok 
+                        ELSE 'Others' 
+                    END <> 'Others'
+                "))
+                ->get();
+
+               
+            $rokoklain = $merklain->pluck('rokok')->toJson();
+           
+            $JMLrokoklain = $merklain->pluck('count_others')->toJson();  
+            $jmlpekerjaan = $pekerjaan->pluck('jml_pekerjaan')->toJson();
+            $namapekerjaan = $pekerjaan->pluck('pekerjaan')->toJson();
+            $jumlah = $venue->pluck('count')->toJson();
+            $tpt = $venue->pluck('venue')->toJson();
+            $countumur = $umur->pluck('count')->toJson();
+            $ss = $umur->pluck('umur')->toJson();
+
+            return view('customerreport.index', compact('jumlah', 'tpt', 'countumur', 'ss', 'umur', 'venuerokok', 'rokokList', 'rokokCounts','jmlpekerjaan','namapekerjaan','pekerjaan','rokoklain','JMLrokoklain','merklain'));
+        }
+
+
+
 
     
    

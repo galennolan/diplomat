@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use alert;
+use Alert;
 use App\User;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\DB;
@@ -18,8 +18,23 @@ class UserController extends Controller
      */
     public function index()
     {
-        $user=\App\User::All();
-        return view ('admin.user', ['user'=>$user]);
+      
+        $user = \App\User::select('users.id', 'users.name', 'users.email', 'users.area', 'users.tim', 'c.name AS teamleader')
+        ->leftJoin('users AS b', 'b.tl', '=', 'users.id')
+        ->leftJoin('users AS c', 'c.id', '=', 'users.tl');
+    
+
+        if (auth()->user()->hasRole('TL')) {
+            $user->where('users.tim', '=', auth()->user()->tim)->whereNotIn('users.id', [1, 3]);
+        }elseif(auth()->user()->hasRole('adminarea')) {
+            $user->where('users.area', '=', auth()->user()->area)->whereNotIn('users.id', [1]);}
+        
+        $user = $user->groupBy('users.id')->get();
+
+        return view('admin.user', [
+            'user' => $user,
+        ]);
+
     }
 
     /**
@@ -40,21 +55,34 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-       $save_user= new \App\User;
-       $save_user->name=$request->get('username');
-       $save_user->email=$request->get('email');
-       $save_user->password=bcrypt('password');
-       if($request->get('roles')=='ADMIN'){
-             $save_user->assignRole('admin');}
-       else
-       {
+        $save_user= new \App\User;
+        $save_user->name=$request->get('username');
+        $save_user->email=$request->get('email');
+        $save_user->password=bcrypt('password');
+        $save_user->area=$request->get('area');
+        $save_user->tim=$request->get('tim');
+        if($request->get('roles')=='ADMIN'){
+            $save_user->assignRole('admin');
+        }
+        else if ($request->get('roles') == 'adminarea')
+        {
+            $save_user->assignRole('adminarea');
+        }
+        else if ($request->get('roles') == 'tl')
+        {
+            $save_user->assignRole('tl');
+        }
+        else 
+        {
             $save_user->assignRole('user');
         }
-         $save_user->save();
-            Alert::success('Tersimpan','Data Berhasil disimpan');
-       return redirect()->route('user.index');    
-       
+        $save_user->save();
+        Alert::success('Tersimpan','Data Berhasil disimpan');
+        return redirect()->route('admin.index');
     }
+    
+        
+
 
     /**
      * Display the specified resource.
@@ -64,8 +92,9 @@ class UserController extends Controller
      */
     public function show($id)
     {
-     $user = User::find($id);
-    return view('admin.user',compact('user'));
+        
+        $user = User::find($id);
+        return view('admin.user',compact('admin'));
      }
 
     /**
@@ -74,16 +103,30 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function getUsersWithRole($roleName)
     {
+        $teamleader = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+            ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+            ->where('roles.name', $roleName)
+            ->select('users.*')
+            ->get();
+        return $teamleader;
+    }
+     public function edit($id)
+    {
+        $role = Role::findByName('TL');
+        $teamleader = $this->getUsersWithRole($role->name);
         $user = User::find($id);
         $peran = $user->roles ;
+        $password = $user->password ;
         $roles = Role::pluck('name')->all();
         $userRole = $peran->pluck('name')->all();
-        return view ('admin.editUser',compact('user','roles','userRole'));
+        return view ('admin.editUser',compact('teamleader','user','roles','userRole'));
 
       
     }
+  
+
 
     /**
      * Update the specified resource in storage.
@@ -97,8 +140,14 @@ class UserController extends Controller
         $user = User::find($id);
         DB::table('model_has_roles')->where('model_id',$id)->delete();
         $user->assignRole($request->input('role'));
+        $user->area=$request->area;
+        $user->password=bcrypt($request->input('password'));
+        $user->tim=$request->tim;
+        $user->tl=$request->tl;
+        $user->email=$request->email;
+        $user->save();
         //Alert::success ('Update','Data Berhasil diupdate');
-        return redirect()->route('user.index');
+        return redirect()->route('admin.index');
      }
 
     /**
@@ -113,6 +162,6 @@ class UserController extends Controller
         $hapus->delete();
         $hapus->removeRole('admin','user');
         Alert::success('Terhapus', 'Data Berhasil Dihapus');
-        return redirect()->route('user.index');
+        return redirect()->route('admin.index');
     }
 }

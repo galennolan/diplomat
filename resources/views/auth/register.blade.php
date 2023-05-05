@@ -16,7 +16,7 @@
 </head>
 <body class="bg-gradient-light">
     <div class="text-center">
-          <br><img src="{{ asset('asset/img/logo_ubsi.png')}}" width="100"></h1>
+          <br><img src="{{ asset('asset/img/pixel-hitam.png')}}" width="100"></h1>
           
          </div>
      <div class="container">
@@ -57,10 +57,27 @@
                                 @enderror
                             </div>
                         </div>
-    
-                        <div class="form-group row">
-                          
 
+                        <div class="form-group row">
+
+                        <div class="col-md-12">
+                            <select id="area" required class="form-control @error('area') is-invalid @enderror" name="area" value="{{ old('area') }}">
+                                <option value="">Select your area</option>
+                                <option value="Semarang">Semarang</option>
+                                <option value="Solo">Solo</option>
+                                <option value="Yogyakarta">Yogyakarta</option>
+                            </select>
+
+                            @error('name')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+                        </div>
+
+
+                        <div class="form-group row">
                             <div class="col-md-12">
                                 <input id="password" required placeholder="Password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password">
 

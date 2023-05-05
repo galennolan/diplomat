@@ -84,7 +84,7 @@ class SpgReportController  extends Controller
                 return $query->whereBetween('created_at', [date('Y-m-d H:i:s', $tanggalawal), date('Y-m-d H:i:s', $tanggalakhir+ 86399)]);
             })
             ->when($location, function ($query, $location) {
-                return $query->where('id_kabupaten', $location);
+                return $query->where('area', $location);
             })
             ->groupBy('date')
             ->orderBy('date', 'ASC')

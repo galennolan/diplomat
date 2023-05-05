@@ -24,30 +24,27 @@
                   <div class="col-md-6 mb-3">
                   <div class="form-floating">
                         <label class="font-weight-bold" for="exampleFormControlSelect1">Area</label>
-                        <select class="form-control" name="area" id="area">
-                        <option value="all">All</option>
-                        @foreach($kabupaten as $kab)
-                        <option value="{{$kab->id}}">{{$kab->nama_kabupaten}}</option>
-
-                         @endforeach
+                        <select class="form-control" name="area" id="area" onchange="loadData()">
+                            <option value="all">All</option>
+                            <option value="">Please select</option>
+                            <option value="Semarang01">Semarang01</option>
+                            <option value="Semarang02" >Semarang02</option>
+                            <option value="Solo">Solo</option>
                         </select>
                     </div>
                     </div>
+             
 
                     <div class="col-md-6 mb-3">
                     <div class="form-floating">
                         <label class="font-weight-bold" for="exampleFormControlSelect1">Female Presenter</label>
                         <select class="form-control" name="user-select" id="user-select">
-                        
                         @foreach($user as $user)
                         <option value="{{$user->name}}">{{$user->name}}</option>
-
                          @endforeach
                         </select>
                     </div>
                     </div>
-                    
-          
                   </div>
           
                   <div class="row g-2">
@@ -57,6 +54,7 @@
                     <input type="date" min="1" name="tanggalawal" id="tanggalawal" class="form-control"  required >
                     </div>
                     </div>
+
                     <div class="col-md-6 mb-3">
                       <div class="form-floating">
                         <label for="exampleFormControlInput1">Tanggal Selesai</label>
@@ -64,6 +62,7 @@
                       </div>
                     </div>
                   </div>
+                  
                   <div class="row">
                     <div class="col-md-12 mb-3">
                       <div class="card h-100">

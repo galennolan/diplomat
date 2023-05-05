@@ -8,14 +8,7 @@ class Customer extends Model
     
     
     protected $table = "customer";
-   
-    public function provinsi()
-    {
-        return $this->hasOne('App\Provinsi', 'id','nama_provinsi');
-    }
+    protected $fillable=['area','rayon','name','telp','id_user','kab','venue','jenis_kelamin','umur','pekerjaan','rokok','jml_beli','tempatbeli','alasan','akanbeli','hargadip','pernahrasa','rasadip','IG','email','kemasan','open'];
 
-    public function kabupaten()
-    {
-        return $this->hasOne('App\Kabupaten', 'id','nama_kabupaten');
-    }
+    
 }

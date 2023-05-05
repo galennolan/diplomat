@@ -8,9 +8,10 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Beranda</title>
+    <title>Pixel Diplomat</title>
 
     <link href="{{ asset('asset/vendor/fontawesome-free/css/all.min.css')}}" rel="stylesheet" type="text/css">
+    <link rel="icon" href="{{ URL::asset('/img/favicon.ico') }}" type="image/x-icon"/>
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
@@ -18,17 +19,21 @@
         <link href="{{ asset('asset/css/sb-admin-2.min.css')}}" rel="stylesheet">
         <link href="{{ asset('asset/vendor/datatables/dataTables.bootstrap4.min.css')}}" rel="stylesheet">
         
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+        
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css" integrity="sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/fontawesome.min.css" integrity="sha384-jLKHWM3JRmfMU0A5x5AkjWkw/EYfGUAGagvnfryNV3F9VqM98XiIH7VBGVoxVSc7" crossorigin="anonymous">
     -->
     <!-- RawGit CDN chart.css -->
     <link rel="stylesheet" href="https://cdn.rawgit.com/theus/chart.css/v1.0.0/dist/chart.css" />
-        
-        <!-- text diatas bar  -->
-        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
-
+  
+    <style>
+		.navbar .nav-item .active {
+			color: black !important;
+		}
+	</style>
 </head>
 
 <body id="page-top">
@@ -37,114 +42,7 @@
     <div id="wrapper">
 
         <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-danger sidebar sidebar-dark accordion" id="accordionSidebar">
-
-            <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="#">
-                <div class="sidebar-brand-icon rotate-n-0">
-                    <img src="{{asset('asset/img/logo_diplomat.jpg')}}" width="60" class="rounded-circle">
-                </div>
-                <div class="sidebar-brand-text mx-2">Diplomat MILD</div>
-            </a>
-
-            <!-- Divider -->
-            <hr class="sidebar-divider my-0">
-
-            <!-- Divider -->
-            <hr class="sidebar-divider">
-            <li class="nav-item">
-            <a class="nav-link" href="{{route('home')}}">
-            <i class="fas fa-fw fa-home"></i>
-            <span> Beranda </span> </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="{{route('customer')}}">
-                    <i class="fas fa-bullhorn"></i>
-                    <span>DATA INPUT SPG</span>
-                </a>                     
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="{{route('spgreport')}}">
-                    <i class="fas fa-poll"></i>
-                    <span>SPG Report</span>
-                </a>                     
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="{{route('customerreport')}}">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Customer Report</span>
-                </a>                     
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="{{route('salesreport.index')}}">
-                    <i class="fas fa-fw fa-archive"></i>
-                    <span>Sales Report</span>
-                </a>                     
-            </li>
-                    <!-- Nav Item - Pages Collapse Menu -->
-              @role('admin')
-             <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
-                    aria-expanded="true" aria-controls="collapsePages">
-                    <i class="fas fa-fw fa-folder-open"></i>
-                    <span>  ADMIN</span>
-                </a>
-                <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item fas fa-user" href="{{route('user.index')}}"> Master User</a>
-                         <a class="collapse-item fas fa-arrow-circle-right" href="{{route('barang.index')}}"> Master Barang</a>
-                        <a class="collapse-item fas fa-arrow-circle-right" href="{{route('supplier.index')}}"> Master Supplier</a>
-                        <a class="collapse-item fas fa-arrow-circle-right" href="{{route('akun.index')}}"> Master Akun</a>
-                        <a class="collapse-item fas fa-arrow-circle-right" href="{{route('setting.transaksi')}}"> Master Setting Akun</a>
-                    </div>
-                </div>     
-            </li>  
-            @endrole
-            <!-- <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages1"
-                    aria-expanded="true" aria-controls="collapsePages1">
-                    <i class="fas fa-fw fa-folder-open"></i>
-                    <span>Transaksi</span>
-                </a>
-                <div id="collapsePages1" class="collapse" aria-labelledby="headingPages"
-                    data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item fas fa-arrow-circle-right" href="{{route('pemesanan.transaksi')}}"> Pemesanan</a>
-                        <a class="collapse-item fas fa-arrow-circle-right" href="{{route('pembelian.transaksi')}}"> Pembelian</a>
-                        <a class="collapse-item fas fa-arrow-circle-right" href="{{route('retur.transaksi')}}"> Retur</a>
-                    </div>
-                </div>
-            </li> -->
-
-            <!-- Nav Item - Tables -->
-            <!-- <li class="nav-item">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages2"
-                    aria-expanded="true" aria-controls="collapsePages2">
-                    <i class="fas fa-fw fa-table"></i>
-                    <span>Laporan</span></a>
-                    <div id="collapsePages2" class="collapse" aria-labelledby="headingPages"
-                    data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item fas fa-arrow-circle-right" href="{{route('laporan.index')}}"> Jurnal Umum</a>
-                        <a class="collapse-item fas fa-arrow-circle-right" href="{{route('stok.index')}}"> Stok Barang</a>
-                        
-                    </div>
-                </div>
-            </li> -->
-
-
-            <!-- Divider -->
-            <hr class="sidebar-divider d-none d-md-block">
-
-            <!-- Sidebar Toggler (Sidebar) -->
-            <div class="text-center d-none d-md-inline">
-                <button class="rounded-circle border-0" id="sidebarToggle"></button>
-            </div>
-
-        </ul>
+       
         <!-- End of Sidebar -->
 
         <!-- Content Wrapper -->
@@ -154,57 +52,75 @@
             <div id="content">
 
                 <!-- Topbar -->
-                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+               
 
-                    <!-- Sidebar Toggle (Topbar) -->
-                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                        <i class="fa fa-bars"></i>
-                    </button>
+                <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <a class="navbar-brand" href="{{route('home')}}"><div class="sidebar-brand-icon rotate-n-0">
+                    <img src="{{asset('asset/img/pixel-putih.png')}}" width="60">
+                </div></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="nav nav-tabs">
+                    @role('user|admin')
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{route('customer')}}"><small>Customer</small></a>                     
+                    </li>
+                    @endrole
 
-                    <!-- Topbar Search -->
-                    <form
-                        class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
-                        <div class="input-group">
-                            <div class="input-group-append">
-                                <h4>Diplomat MILD</h4>
-                            </div>
-                        </div>
-                    </form>
+                    @hasanyrole('user|TL')
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{route('sales.index')}}"><small>Sales<br> Report SPG</small></a>                     
+                    </li>
 
-                    <!-- Topbar Navbar -->
-                    <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{route('dailyreport')}}"><small>Daily Report</small></a>                     
+                    </li>
+                    @endhasanyrole
 
-                        <!-- Nav Item - Search Dropdown (Visible Only XS) -->
-                        <li class="nav-item dropdown no-arrow d-sm-none">
-                            <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-search fa-fw"></i>
-                            </a>
-                            <!-- Dropdown - Messages -->
-                            <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
-                                aria-labelledby="searchDropdown">
-                                <form class="form-inline mr-auto w-100 navbar-search">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control bg-light border-0 small"
-                                            placeholder="Search for..." aria-label="Search"
-                                            aria-describedby="basic-addon2">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-danger" type="button">
-                                                <i class="fas fa-search fa-sm"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </li>
+                    @hasanyrole('admin|adminarea')
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{route('salesreport')}}"><small>Sales <br>Report</small></a>                     
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{route('dailyreportall')}}"><small>Daily Report<br> All</small></a>                     
+                    </li>
+                    @endhasanyrole
+                    
+                    @role('admin')
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{route('reportefektivitas')}}"><small>SPG<br> Team Report</small></a>                     
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{route('customerreport')}}"><small>Customer<br> Report</small></a>                     
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{route('reportsalesall')}}"><small>Report<br> per Rayon</small></a>                     
+                    </li>
+                    @endrole
+
+                    @hasanyrole('admin|TL')
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{route('admin.index')}}"><small>ADMIN</small></a>                     
+                    </li>  
+                    @endhasanyrole
+                </ul>
+                </div>
+                <ul class="navbar-nav ml-auto">
+                   
+                       
                         <div class="topbar-divider d-none d-sm-block"></div>
 
                         <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ Auth::user()->name }}</span>
-                                <img class="img-profile rounded-circle" src="{{asset('asset/img/avatar2.png')}}">
+                                <span class="mr-2 d-none d-lg-inline text-white small">{{ Auth::user()->name }}</span>
+                                <img class="img-profile rounded-circle" src="{{asset('asset/img/image2.png')}}">
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
@@ -220,8 +136,17 @@
                                 </a>
                             </div>
                         </li>
+
                     </ul>
-                </nav>
+
+            </nav>
+
+
+                    <!-- Topbar Search -->
+               
+
+                    <!-- Topbar Navbar -->
+\
                 <!-- End of Topbar -->
 
                 <!-- Begin Page Content -->
@@ -294,7 +219,7 @@
     <script src="asset/js/sb-admin-2.min.js"></script>
 
     <!-- Page level plugins -->
-    <!-- <script src="asset/vendor/chart.js/Chart.min.js"></script> -->
+ <script src="asset/vendor/chart.js/Chart.min.js"></script> 
     <script src="asset/vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="asset/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
@@ -303,7 +228,27 @@
     <script src="asset/js/demo/chart-pie-demo.js"></script>
     <script src="asset/js/demo/datatables-demo.js"></script>
 
+
+    <script>
+    $(document).ready(function() {
+        // Get the current URL without any parameters
+        var currentUrl = window.location.href.split("?")[0];
+        
+        // Set the active class on the appropriate link based on the current URL
+        $('ul.nav-tabs a[href="' + currentUrl + '"]').addClass('active');
+        
+        // Remove active class from home link if the current page is not the home page
+        if (currentUrl !== "{{ route('home') }}") {
+            $('ul.nav-tabs a[href="{{ route('home') }}"]').removeClass('active');
+        }
+    });
     
+    // Set the color of the active link to blue
+    $('ul.nav-tabs a.active').css('color', 'black');
+</script>
+
+
+
 </body>
 
 </html>

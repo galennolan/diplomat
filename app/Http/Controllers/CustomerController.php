@@ -11,6 +11,7 @@ use App\Users;
 use Spatie\Permission\Models\Role;
 use Alert;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 
 
@@ -22,17 +23,21 @@ class CustomerController extends Controller
     }
 
     public function prodfunct(){
+        
+        $last30Days = Carbon::now()->subDays(30)->toDateTimeString();
+
         $customer = DB::table('customer')
-        ->leftJoin('kabupaten','kabupaten.id', '=','customer.id_kabupaten')
-        ->leftJoin('provinsi','provinsi.id', '=','customer.id_provinsi')
         ->select('*')
-        ->selectRaw('users.name as namasales,customer.name as namacust')
+        ->selectRaw('users.name as namasales,customer.name as namacust,customer.created_at',)
         ->selectRaw('users.id as idsales,customer.id as idcust')
         ->leftJoin('users','users.id', '=','customer.id_user')
-        ->get();
-        $kabupaten = Kabupaten::all();
-        $Provinsi = Provinsi::all();//get data from table
-        return view('customer.index', compact('Provinsi', 'kabupaten', 'customer'));//sent data to view
+        ->where('customer.created_at', '>=', $last30Days);
+        if (auth()->user()->hasRole('user|tl')) {
+            $customer->where('users.id', auth()->user()->id);
+        } else {
+        }
+        $customer= $customer->get();
+        return view('customer.index', compact( 'customer'));//sent data to view
     }
 
 	public function findProductName(Request $request){
@@ -53,14 +58,16 @@ class CustomerController extends Controller
         $tambah_cust->address = $request->address;
         $tambah_cust->no_hp = $request->no_hp;
         $tambah_cust->id_user =Auth::user()->id;
-        $tambah_cust->id_kabupaten = $request->op;
-        $tambah_cust->id_provinsi = $request->prod_cat_id;
         $tambah_cust->venue = $request->venue;
         $tambah_cust->telp = $request->telp;
+        $tambah_cust->IG = $request->IG;
+        $tambah_cust->email = $request->email;
         $tambah_cust->jenis_kelamin = $request->jenis_kelamin;
         $tambah_cust->umur = $request->umur;
         $tambah_cust->pekerjaan = $request->pekerjaan;
         $tambah_cust->merk_rokok = $request->merk_rokok;
+        $tambah_cust->pernahrasa = $request->pernahrasa;
+        $tambah_cust->alasan = $request->alasan;
         $tambah_cust->jml_beli = $request->jml_beli;
  
         $tambah_cust->save();
@@ -78,23 +85,38 @@ class CustomerController extends Controller
     {
         $cust= \App\Customer::findorFail($id);
         $cust->name = $request-> get ('name');
-        $cust->address = $request-> get ('address');
-        $cust->no_hp = $request-> get ('no_hp');
-        $cust->id_user =Auth::user()->id;
-        $cust->id_kabupaten = $request->get ('op');
-        $cust->id_provinsi = $request->get ('prod_cat_id');
+        $cust->area = $request-> get ('area');
+        $cust->rayon = $request-> get ('rayon');
+        $cust->kab = $request->get ('kab');
+        $cust->IG = $request->get ('IG');
+        $cust->email = $request->get ('email');
         $cust->venue = $request->get ('venue');
         $cust->telp = $request->get ('telp');
         $cust->jenis_kelamin = $request->get ('jenis_kelamin');
         $cust->umur = $request->get ('umur');
+        $cust->rasadip = $request->get ('rasadip');
+        $cust->pernahrasa = $request->get ('pernahrasa');
+        $cust->hargadip = $request->get ('hargadip');
+        $cust->akanbeli = $request->get ('akanbeli');
+        $cust->alasan = $request->get ('alasan');
+        $cust->open = $request->get ('open');
+        $cust->kemasan = $request->get ('kemasan');
+        $cust->tempatbeli = $request->get ('tempatbeli');
         $cust->pekerjaan = $request->get ('pekerjaan');
-        $cust->merk_rokok = $request->get ('merk_rokok');
+        $cust->rokok = $request->get ('rokok');
         $cust->jml_beli = $request->get ('jml_beli');
         $cust -> save();
 
-        return redirect() ->route ('customer.index', [$id]);
+        return redirect ('/customer');
 
     }
     
+    public function destroy($id)
+    {
+        $hapus= \App\Customer::findorFail($id);
+        $hapus->delete();
+        Alert::success('Terhapus', 'Data Berhasil Dihapus');
+        return redirect()->route('customer');
+    }
 
 }

@@ -4,61 +4,83 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Barang;
+use App\Customer;
 use Spatie\Permission\Models\Role;
 use Alert;
+use Carbon\Carbon;
+use App\Exports\CustomerExport;
+use Maatwebsite\Excel\Facades\Excel;
+
+
 
 class SalesReportController extends Controller
 {
        public function index()
-    {
-        $barang = \App\Barang::All();
-        return view ('salesreport.salesreport',['barang'=>$barang]);
+        {   
+            $area = auth()->user()->area;
+
+           
+            $last30Days = Carbon::now()->subDays(31)->toDateTimeString();
+
+
+            $customer = DB::table('customer')
+            ->select('customer.id', 'customer.name', 'customer.telp', 'customer.jenis_kelamin', 'customer.umur',
+                'customer.id_user', 'customer.pekerjaan', 'customer.rokok', 'customer.pernahrasa', 'customer.rasadip',
+                'customer.hargadip', 'customer.akanbeli', 'customer.alasan', 'customer.created_at', 'customer.jml_beli',
+                'customer.area', 'customer.rayon', 'customer.tempatbeli','customer.kab', 'customer.venue','customer.open','customer.kemasan', 'users.name as namasales', 
+                'users.id as idsales', 'b.name AS spg', 'c.name AS teamleader')
+            ->leftJoin('users', 'users.id', '=', 'customer.id_user')
+            ->leftJoin('users AS b', 'b.tl', '=', 'users.id')
+            ->leftJoin('users AS c', 'c.id', '=', 'users.tl');
+           
+            if (auth()->user()->hasRole('adminarea')) {
+                $customer->where('customer.area', auth()->user()->area);
+            }
+
+            $customer=$customer->where('customer.created_at', '>=', $last30Days)
+            ->groupBy('customer.id')
+            ->get();
+ 
+            
+            if ($customer->isEmpty()) {
+                return redirect()->route('no_data_found'); // or display an error message
+            }
+
+            return view ('salesreport.salesreport',['area'=>$area,'customer'=>$customer]);
+            
+        }
+
+        public function loadData(Request $request)
+        {
+            
+            $area = $request->get('area');
+            $tanggalawal = date('Y-m-d H:i:s', strtotime($request->input('tanggalawal')));
+            $tanggalakhir = date('Y-m-d 23:00:00', strtotime($request->input('tanggalakhir')));
         
-    }
-    public function create()
-    {
-        return view ('customer.customer.input');
-    }
-
+            $customer = DB::table('customer')
+                ->select(
+                    'customer.id', 'customer.name', 'customer.telp', 'customer.jenis_kelamin', 'customer.umur',
+                    'customer.id_user', 'customer.pekerjaan', 'customer.rokok', 'customer.pernahrasa', 'customer.rasadip', 
+                    'customer.hargadip', 'customer.akanbeli', 'customer.alasan', 'customer.open as open','customer.kemasan','customer.created_at', 'customer.jml_beli', 
+                    'customer.area', 'customer.rayon', 'customer.kab', 'customer.venue', 'users.name AS namasales', 
+                    'users.id AS idsales','b.name AS spg', 'c.name AS teamleader','customer.tempatbeli',
+                )
+                ->leftJoin('users', 'users.id', '=', 'customer.id_user')
+                ->leftJoin('users AS b', 'b.tl', '=', 'users.id')
+                ->leftJoin('users AS c', 'c.id', '=', 'users.tl')
+                ->where('customer.area', '=', $area)
+                ->whereBetween('customer.created_at', [$tanggalawal, $tanggalakhir])
+                ->groupBy('customer.id')
+                ->get();
+                    
+                
+            return view ('salesreport.salesreport',['area'=>$area,'customer'=>$customer]);
     
-    public function store(Request $request)
-    {
-        $tambah_barang=new \App\Barang;
-        $tambah_barang->kd_brg = $request->addkdbrg;
-        $tambah_barang->nm_brg = $request->addnmbrg;
-        $tambah_barang->harga = $request->addharga;
-        $tambah_barang->stok = $request->addstok;
-        $tambah_barang->timestamps = false;
-        $tambah_barang->save();
-        Alert::success('Pesan','Data berhasil disimpan');
-        return redirect ('/barang');
     }
 
-    public function destroy ($kd_brg)
+        
+    public function export(Request $request)
     {
-        $barang=\App\Barang::findorFail($kd_brg);
-        $barang ->delete();
-        Alert::success('Pesan', 'Data berhasil dihapus');
-        return redirect()->route('barang.index');
-    }
-    
-    public function edit ($kd_brg)
-    {
-        $bar_edit=\App\Barang::findorFail($kd_brg);
-        return view ('customer.editcustomer', ['barang'=> $bar_edit]);
-
-    }
-    public function update (Request $request, $kd_brg)
-    {
-        $brg= \App\Barang::findorFail($kd_brg);
-        $brg ->kd_brg = $request -> get ('addkdbrg');
-        $brg ->nm_brg = $request -> get ('addnmbrg');
-        $brg ->harga = $request -> get ('addharga');
-        $brg ->stok = $request -> get ('addstok');
-        $brg -> save();
-
-        return redirect() ->route ('customer.index', [$kd_brg]);
-
+        return Excel::download(new CustomerExport, 'customers.xlsx');
     }
 }

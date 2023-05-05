@@ -14,21 +14,9 @@
                         </div>
                     @endif
 
-                    {{ __('You are logged in!') }}
-                    <form>
-                    <label for="dropdown">Select an option:</label>
-                    <select id="dropdown" name="dropdown" onchange="toggleInputField()">
-                        <option value="regular">Regular option</option>
-                        <option value="note">Note</option>
-                        <option value="joko">Joko</option>
-                        <option value="saryono">Saryono</option>
-                        <option value="other">Other</option>
-                    </select>
-                    <input type="text" id="otherInput" name="otherInput" style="display: none;">
-                    <input type="submit" value="Submit">
-                    </form>
+                    {{ __('Kamu Berhasil Login ya, :name sebagai :role', ['name' => Auth::user()->name,'role'=> Auth::user()->getRoleNames()->first()])  }}
 
-
+                
                 </div>
             </div>
         </div>
