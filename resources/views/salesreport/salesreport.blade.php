@@ -122,10 +122,13 @@
             <td>{{ $data->alasan }}</td>
             </tr>
             @endforeach
-
+<!-- Display the pagination links -->
+        
         </tbody>
         </table>
-      
+        <div class="d-flex justify-content-center">
+            {{ $customer->render('vendor.sb') }}
+        </div>
 </div>
 
 

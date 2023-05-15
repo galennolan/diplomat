@@ -39,7 +39,7 @@ class SalesReportController extends Controller
 
             $customer=$customer->where('customer.created_at', '>=', $last30Days)
             ->groupBy('customer.id')
-            ->get();
+            ->paginate(10); 
  
             
             if ($customer->isEmpty()) {
