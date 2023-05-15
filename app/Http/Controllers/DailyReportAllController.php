@@ -59,6 +59,7 @@ class DailyReportAllController extends Controller
         ->leftJoin('users', 'users.id', '=', 'customer.id_user')
         ->select(DB::raw('COUNT(customer.id) AS CC, customer.area,COUNT(CASE WHEN customer.jml_beli > 0 THEN customer.id END) AS ECC, SUM(customer.jml_beli) AS packsell, users.name AS namasales,DATE_FORMAT(customer.created_at, "%d/%m") AS created_date'))
         ->groupBy('users.name', DB::raw('DATE_FORMAT(customer.created_at, "%d/%m")'))
+        ->where('customer.created_at', '>=', $last30Days)
         ->orderBy('customer.created_at', 'asc');
          
         if (auth()->user()->hasRole('adminarea')) {
@@ -98,7 +99,7 @@ class DailyReportAllController extends Controller
         $area = $request->get('area');
         $namasales = $request->get('namasales');
         $tanggalawal = date('Y-m-d H:i:s', strtotime($request->input('tanggalawal')));
-        $tanggalakhir = date('Y-m-d 9:00:00', strtotime($request->input('tanggalakhir')));
+        $tanggalakhir = date('Y-m-d 23:59:59', strtotime($request->input('tanggalakhir')));
 
         $ccData = [];
         $eccData = [];

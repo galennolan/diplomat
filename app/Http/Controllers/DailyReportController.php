@@ -36,12 +36,14 @@ class DailyReportController  extends Controller
         $ccData = [];
         $eccData = [];
         $packData = [];
+        $packDatadm = [];
+        $packDatadmm = [];
         $createdDate = [];
         $customer = \App\Customer::All();
         // Retrieve the selected user name from the request
         $customer = DB::table('customer')
         ->leftJoin('users', 'users.id', '=', 'customer.id_user')
-        ->select(DB::raw('COUNT(customer.id) AS CC, customer.area,users.tim as tim,users.name as namasales,COUNT(CASE WHEN customer.jml_beli > 0 THEN customer.id END) AS ECC, SUM(customer.jml_beli) AS packsell, DATE_FORMAT(customer.created_at, "%d/%m") AS created_date'))
+        ->select(DB::raw('COUNT(customer.id) AS CC, customer.area,users.tim as tim,users.name as namasales,COUNT(CASE WHEN customer.jml_beli > 0 THEN customer.id END) AS ECC, SUM(customer.jml_beli) AS packsell, SUM(CASE WHEN customer.pernahrasa = \'Diplomat Mild\' THEN customer.jml_beli ELSE 0 END) AS packselldm ,SUM(CASE WHEN customer.pernahrasa IN (\'Diplomat Mild M\', \'Diplomat Mild Menthol\') THEN customer.jml_beli ELSE 0 END) AS packsellDMM ,DATE_FORMAT(customer.created_at, "%d/%m") AS created_date'))
         ->where('customer.created_at', '>=', $last30Days);
         if (auth()->user()->hasRole('TL')) {
             $customer->where('users.tim', '=', Auth::user()->tim);
@@ -58,18 +60,20 @@ class DailyReportController  extends Controller
             $ccData[] = $data->CC;
             $eccData[] = $data->ECC;
             $packData[] = $data->packsell;
+            $packDatadm[] = $data->packselldm;
+            $packDatadmm[] = $data->packsellDMM;
             $createdDate[] = $data->created_date;
         }
         
         return view ('sales.dailyreport',['zz'=>$zz,'targetecc'=>$targetecc,'targetcc'=>$targetcc,'customer'=>$customer,'ccData' => json_encode($ccData),
-        'eccData' => json_encode($eccData),'packData' => json_encode($packData),'createdDate'=> json_encode($createdDate)]);
+        'eccData' => json_encode($eccData),'packData' => json_encode($packData),'packDatadm' => json_encode($packDatadm),'packDatadmm' => json_encode($packDatadmm),'createdDate'=> json_encode($createdDate)]);
     }
 
         public function loadData(Request $request)
         {
             $zz ="";
             $tanggalawal = date('Y-m-d H:i:s', strtotime($request->input('tanggalawal')));
-            $tanggalakhir = date('Y-m-d 9:00:00', strtotime($request->input('tanggalakhir')));
+            $tanggalakhir = date('Y-m-d 23:59:59', strtotime($request->input('tanggalakhir')));
             // Query the data based on the selected date range
 
                 $targetecc = 40;
@@ -79,10 +83,12 @@ class DailyReportController  extends Controller
             $ccData = [];
             $eccData = [];
             $packData = [];
+            $packDatadm = [];
+            $packDatadmm = [];
             $createdDate = [];
             $customer = DB::table('customer')
             ->leftJoin('users', 'users.id', '=', 'customer.id_user')
-            ->select(DB::raw('COUNT(customer.id) AS CC, users.tim as tim,users.name as namasales,customer.area,COUNT(CASE WHEN customer.jml_beli > 0 THEN customer.id END) AS ECC, SUM(customer.jml_beli) AS packsell, DATE_FORMAT(customer.created_at, "%d/%m") AS created_date'));
+            ->select(DB::raw('COUNT(customer.id) AS CC, customer.area,users.tim as tim,users.name as namasales,COUNT(CASE WHEN customer.jml_beli > 0 THEN customer.id END) AS ECC, SUM(customer.jml_beli) AS packsell, SUM(CASE WHEN customer.pernahrasa = \'Diplomat Mild\' THEN customer.jml_beli ELSE 0 END) AS packselldm ,SUM(CASE WHEN customer.pernahrasa IN (\'Diplomat Mild M\', \'Diplomat Mild Menthol\') THEN customer.jml_beli ELSE 0 END) AS packsellDMM ,DATE_FORMAT(customer.created_at, "%d/%m") AS created_date'));
             if (auth()->user()->hasRole('TL')) {
                 $customer->where('users.tim', '=', Auth::user()->tim);
             }else{ $customer->where('users.id', '=',  Auth::user()->id);}
@@ -94,11 +100,13 @@ class DailyReportController  extends Controller
                 $ccData[] = $data->CC;
                 $eccData[] = $data->ECC;
                 $packData[] = $data->packsell;
+                $packDatadm[] = $data->packselldm;
+                $packDatadmm[] = $data->packsellDMM;
                 $createdDate[] = $data->created_date;
             }
             // Pass the data to the view
             return view('sales.dailyreport', ['zz'=>$zz,'targetecc'=>$targetecc,'targetcc'=>$targetcc,'customer'=>$customer,'ccData' => json_encode($ccData),
-             'eccData' => json_encode($eccData),'packData' => json_encode($packData),'createdDate'=> json_encode($createdDate)]);
+             'eccData' => json_encode($eccData),'packData' => json_encode($packData),'packDatadm' => json_encode($packDatadm),'packDatadmm' => json_encode($packDatadmm),'createdDate'=> json_encode($createdDate)]);
         }
 
 

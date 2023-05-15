@@ -20,7 +20,7 @@ class SalesReportController extends Controller
             $area = auth()->user()->area;
 
            
-            $last30Days = Carbon::now()->subDays(31)->toDateTimeString();
+            $last30Days = Carbon::now()->subDays(30)->toDateTimeString();
 
 
             $customer = DB::table('customer')
