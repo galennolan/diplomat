@@ -48,6 +48,7 @@
                     <option value="Wonosari">Wonosari</option>
                     <option value="Bantul">Bantul</option>
                 <?php elseif ($area == 'Semarang'): ?>
+                    <option value="Semarang">Semarang</option>
                     <option value="Purwodadi">Purwodadi</option>
                     <option value="Salatiga">Salatiga</option>
                 <?php endif; ?>

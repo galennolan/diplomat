@@ -21,6 +21,7 @@
                             <option value="Yogyakarta">Yogyakarta</option>
                             <option value="Wonosari">Wonosari</option>
                             <option value="Bantul">Bantul</option>
+                            <option value="Semarang">Semarang</option>
                             <option value="Purwodadi">Purwodadi</option>
                             <option value="Salatiga">Salatiga</option>
                         </select>
