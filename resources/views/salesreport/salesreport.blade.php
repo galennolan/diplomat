@@ -64,7 +64,7 @@
   <div class="card-body">
     <div class="table-responsive">
 
-      <table class="table table-bordered table-striped" id="dataTable" style="font-size: xx-small; width: 100%; color:black">
+      <table class="table table-bordered table-striped"  style="font-size: xx-small; width: 100%; color:black">
         <thead class="thead-dark">
             <tr>
             <th>No</th>
@@ -94,10 +94,10 @@
         </thead>
         <tbody>
                       
-        @php $i=1 @endphp    
+         
         @foreach($customer as $data)
             <tr>
-            <td>{{ $i++ }}</td>
+            <td>{{ $data->row_number }}</td>
             <td>{{ date('d M Y', strtotime($data->created_at)) }}</td>
             <td>{{ $data->area }}</td>
             <td>{{ $data->rayon }}</td>
@@ -130,8 +130,4 @@
             {{ $customer->render('vendor.sb') }}
         </div>
 </div>
-
-
-
-
 @endsection
