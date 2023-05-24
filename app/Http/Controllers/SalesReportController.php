@@ -65,7 +65,7 @@ class SalesReportController extends Controller
                         ->groupBy('customer.id')
                         ->paginate(10);
 
- 
+            
             
             if ($customer->isEmpty()) {
                 return redirect()->route('no_data_found'); // or display an error message
@@ -96,8 +96,16 @@ class SalesReportController extends Controller
                 ->leftJoin('users AS c', 'c.id', '=', 'users.tl')
                 ->where('customer.area', '=', $area)
                 ->whereBetween('customer.created_at', [$tanggalawal, $tanggalakhir])
-                ->groupBy('customer.id')
-                ->paginate(10);
+                ->groupBy('customer.id');
+                if ($area) {
+                    $customer->where('customer.area', '=', $area);
+                }
+            
+                $customer->whereBetween('customer.created_at', [$tanggalawal, $tanggalakhir])
+                    ->groupBy('customer.id');
+            
+                $customer = $customer->paginate(10);
+            
                     
                 
             return view ('salesreport.salesreport',['area'=>$area,'customer'=>$customer]);

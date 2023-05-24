@@ -58,7 +58,9 @@ Route::middleware(['role:admin|adminarea|TL'])->group(function() {
     Route::post('/customerreport/penjualan', 'CustReportController@loadData')->name('customerreport.penjualan');
 
     Route::get('/salesreport','SalesReportController@index')->name('salesreport');
-    Route::post('/salesreport/penjualan', 'SalesReportController@loadData')->name('salesreport.penjualan');
+    Route::match(['GET', 'POST'], '/salesreport/penjualan', 'SalesReportController@loadData')->name('salesreport.penjualan');
+
+ 
     Route::get('/salesreport/export', [SalesReportController::class, 'export'])->name('salesreport.export');
 
 
