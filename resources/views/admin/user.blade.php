@@ -63,14 +63,17 @@
                             <i class="fas fa-window-close" style="color: #0275d8; font-size: 1.2em; display: block; margin: 0 auto ;text-align: center;"></i>
                         @endif
                         </td>
+                       
                         <td align="center">
                             <a href="{{route( 'admin.edit',[$row->id])}}" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm">
                                 <i class="fas fa-edit fa-sm text-white-50"></i>
                             </a>
+                            @if($row->hasRole('user'))
                             <a href="/admin/hapus/{{ $row->id }}" onclick="return confirm('Yakin Ingin menghapus data?')" class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
                                 <i class="fas fa-trash-alt fa-sm text-white-50"></i> 
-                            </a>
+                            </a>    @endif
                         </td>
+                    
                     </tr>
                     @endforeach
                 </tbody>
@@ -84,26 +87,21 @@
         <form name="frm_add" id="frm_add" class="form-horizontal" action="#" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="modal-content">
-                <div class="modal-header">
+            <div class="modal-header bg-primary text-white">
                     <h4 class="modal-title">Tambah Data User</h4>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
                         <label class="col-lg-20 control-label">Nama User</label>
-                        <div class="col-lg-10">
                             <input type="text" name="username" required class="form-control">
-                        </div>
                     </div>
                     <div class="form-group">
                         <label class="col-lg-20 control-label">Email User</label>
-                        <div class="col-lg-10">
                             <input type="email" name="email" required class="form-control">
-                        </div>
                     </div>
 
-                    <div class="form-group row">
+                    <div class="form-group">
                         <label class="col-lg-20 control-label">Password User</label>
-                            <div class="col-lg-10">
                                 <input id="password" required placeholder="Password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password">
 
                                 @error('password')
@@ -111,78 +109,53 @@
                                         <strong>{{ $message }}</strong>
                                     </span>
                                 @enderror
-                            </div>
                         </div>
                         
-                    <div class="form-group">
-                        <label class="col-lg-20 control-label">Roles/Akses</label>
-                        <div class="col-lg-10">
-                            <select id="roles" name="roles" class="form-control" required>
-                                <option value="">--Pilih Roles--</option>
-                                <?php if (auth()->user()->hasRole('TL')): ?>
-                                    <option value="USER" selected>SPG</option>
-                                <?php elseif (auth()->user()->hasRole('adminarea')): ?>
-                                    <option value="adminarea">adminarea</option>
-                                    <option value="tl">Team Leader</option>
-                                    <option value="USER">SPG</option>
-                                <?php else: ?>
+                        <div class="form-group">
+                            <label class="col-lg-20 control-label">Roles/Akses</label>
+                                <select id="roles" name="roles" class="form-control" required>
+                                    <option value="">--Pilih Roles--</option>
                                     <option value="ADMIN">Admin</option>
                                     <option value="adminarea">adminarea</option>
                                     <option value="tl">Team Leader</option>
                                     <option value="USER">SPG</option>
-                                <?php endif; ?>
-                               
-                            </select>
+                                </select>
                         </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label class="col-lg-20 control-label">Area</label>
-                        <div class="col-lg-10">
-                            <select id="area" name="area" class="form-control" required>
-                                <option value="">--Pilih Area--</option>
-                                <?php if (auth()->user()->hasRole('TL')): ?>
-                                    <option value="{{auth()->user()->area}}" selected>{{auth()->user()->area}}</option>
-                                <?php elseif (auth()->user()->hasRole('adminarea')): ?>
-                                    <option value="{{auth()->user()->area}}" selected>{{auth()->user()->area}}</option>
-                                <?php else: ?>
-                                    <option value="Solo" >Solo</option>
-                                    <option value="Yogyakarta" >Yogyakarta</option>
-                                    <option value="Semarang">Semarang</option>>
-                                <?php endif; ?>
-                               
-                            </select>
+                        <div class="form-group" id="nama-team-group" style="display: none;">
+                            <label class="col-lg-20 control-label">Nama Team</label>
+                            <div class="col-lg-10">
+                                <select id="tl" name="tl" class="form-control" required>
+                                    <option value="">--Nama TL--</option>
+                                    @foreach ($usertl as $row)
+                                    <option value="{{ $row->id }}">{{ $row->name }}-{{ $row->tim }}</option>
+                                    @endforeach       
+                                </select>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label class="col-lg-20 control-label">Tim</label>
-                        <div class="col-lg-10">
-                            <select id="tim" name="tim" class="form-control" required>
-                                <option value="">Please select</option>
-                            <?php if (auth()->user()->area == 'Solo'): ?>
-                                <option value="Solo1">Solo1</option>
-                                <option value="Solo2" selected>Solo2</option>
-                            <?php elseif (auth()->user()->area == 'Yogyakarta'): ?>
-                                <option value="Yogyakarta1" selected>Yogyakarta1</option>
-                                <option value="Yogyakarta2">Yogyakarta2</option>
-                            <?php elseif (auth()->user()->area == 'Semarang'): ?>
-                                <option value="Semarang" selected>Semarang</option>
-                                <option value="Salatiga">Salatiga</option>
-                            <?php else: ?>
-                                <option value="Solo1">Solo1</option>
-                                <option value="Solo2" selected>Solo2</option>
-                                <option value="Yogyakarta1" selected>Yogyakarta1</option>
-                                <option value="Yogyakarta2">Yogyakarta2</option>
-                                <option value="Semarang" selected>Semarang</option>
-                                <option value="Salatiga">Salatiga</option>
-                            <?php endif; ?>
-                               
-                            </select>
-                        </div>
+
+                    <div class="col-lg-20 control-label">
+                        <label for="akses">Tentukan Area</label>
+                        <select id="area" name="area" class="form-control" required>
+                            <option value="Solo">Solo</option>
+                            <option value="Yogyakarta">Yogyakarta</option>
+                            <option value="Semarang">Semarang</option>
+                        </select>
                     </div>
-                    
-                    
+<br>
+                    <div class="col-lg-20 control-label">
+                <label id="tim-lbl2"  for="tim-lbl" style="display: show;">Tentukan Tim</label>
+                <label id="tim-lbl"  for="tim-lbl" style="display: none;">Tentukan Tim sesuai dengan team leader</label>
+                <select id="tim" name="tim" class="form-control" required>
+                    <option value="" selected>Pilih Tim</option>
+                    <option value="Solo1">Solo1 </option>
+                    <option value="Solo2">Solo2 </option>
+                    <option value="Yogyakarta1">Yogyakarta1 </option>
+                    <option value="Yogyakarta2">Yogyakarta2 </option>
+                    <option value="Semarang">Semarang</option>>
+                </select>
+            </div>
                 </div>
                 <div class="modal-footer">
                     
@@ -193,3 +166,20 @@
     </div>
 </div>
 @endsection
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#roles').change(function() {
+            var selectedRole = $(this).val();
+            if (selectedRole === 'USER') {
+                $('#nama-team-group').show();
+                $('#tim-lbl').show();
+                $('#tim-lbl2').hide();
+            } else {
+                $('#nama-team-group').hide();
+                $('#tim-lbl').hide();
+                $('#tim-lbl2').show();
+            }
+        });
+    });
+</script>

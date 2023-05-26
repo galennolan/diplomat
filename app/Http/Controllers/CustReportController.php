@@ -152,27 +152,31 @@ class CustReportController  extends Controller
 
         $rokoknya = ['Diplomat Mild', 'Diplomat Mild Menthol', 'Pro Mild', 'LA Light', 'Class Mild', 'A Mild'];
 
-        $merklain = DB::table('customer')
-            ->select(DB::raw("CASE WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild','Diplomat Mild', 'Diplomat Mild Menthol') THEN rokok ELSE 'Others' END as rokok"), 
-                DB::raw('COUNT(*) as count_others '))
-            ->whereIn('rokok', $rokoknya)
-            ->where('customer.created_at', '>=', $last30Days)
-            ->orWhereNotIn('rokok', $rokoknya)
-            ->leftJoin('users', 'users.id', '=', 'customer.id_user')
-            ->when(Auth::user()->hasRole('adminarea'), function ($query) {
-                return $query->where('customer.area', Auth::user()->area);
-            })
-            ->groupBy(DB::raw("
-            CASE 
-                WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild', 'Diplomat Mild', 'Diplomat Mild Menthol') THEN rokok 
-                ELSE 'Others' 
-            END,
-            CASE 
-                WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild', 'Diplomat Mild', 'Diplomat Mild Menthol') THEN rokok 
-                ELSE 'Others' 
-            END <> 'Others'
-        "))
-            ->get();
+        $subquery = DB::query()
+        ->select(DB::raw("CASE WHEN rokok IN ('Diplomat Mild', 'Diplomat Mild Menthol', 'Pro Mild', 'LA Light', 'Class Mild', 'A Mild') THEN rokok ELSE 'Others' END AS rokok"))
+        ->from('customer')
+        ->where('created_at', '>=', $last30Days)
+        ->fromSub(function ($query) {
+            $query->from('customer');
+        }, 'subquery');
+    
+    $merklain = DB::table(DB::raw("({$subquery->toSql()}) as subquery"))
+        ->mergeBindings($subquery)
+        ->select('rokok', DB::raw('COUNT(*) as count_others'))
+        ->groupBy('rokok')
+        ->get();
+    
+
+$sumOthers = $merklain->where('rokok', 'Others')->sum('count_others');
+
+$merklain = $merklain->reject(function ($row) {
+    return $row->rokok == 'Others';
+});
+
+$merklain->push((object)['rokok' => 'Others', 'count_others' => $sumOthers]);
+
+
+
         
        
 

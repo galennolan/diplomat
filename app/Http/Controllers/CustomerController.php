@@ -24,7 +24,7 @@ class CustomerController extends Controller
 
     public function prodfunct(){
         
-        $last30Days = Carbon::now()->subDays(30)->toDateTimeString();
+        $last30Days = Carbon::now()->subDays(1)->toDateTimeString();
 
         $customer = DB::table('customer')
         ->select('*')

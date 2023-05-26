@@ -25,7 +25,7 @@
             <div class="col-md-3">
                         <label for="Password">Password User</label>
                             
-                                <input id="password" type="text" name="password" class="form-control" value="{{$user->password}}">
+                                <input id="password" type="password"  name="password" class="form-control" value="{{$user->password}}">
                             
                         </div>
                         
@@ -60,7 +60,7 @@
             <div class="col-md-3">
                 <label for="akses">Tentukan Tim</label>
                 <select id="tim" name="tim" class="form-control" required <?php if ($role->id == '1'||$role->id == '3') echo 'disabled' ?>>
-                    <option value="" selected>{{$user->tim}}</option>
+                    <option value="{{$user->tim}}" selected>{{$user->tim}}</option>
                     <option value="Solo1" {{$user->area == 'Solo1' ? 'selected' : ''}}>Solo1 </option>
                     <option value="Solo2"  {{$user->area == 'Solo2' ? 'selected' : ''}}>Solo2 </option>
                     <option value="Yogyakarta1" {{$user->area == 'Yogyakarta1' ? 'selected' : ''}}>Yogyakarta1 </option>
@@ -76,9 +76,9 @@
                     @php
                         $tl_name = DB::table('users')->select('name')->where('id', $user->tl)->first()->name ?? '';
                     @endphp
-                    <option value="{{ $user->tl }}">{{ $tl_name }}</option>
+                    <option value="{{ $user->tl }}">{{ $tl_name }} -{{ $user->tim }}</option>
                         @foreach($teamleader  as $user)
-                            <option value="{{ $user->id }}">{{ $user->name }}</option>
+                            <option value="{{ $user->id }}">{{ $user->name }} -{{ $user->tim }}</option>
                         @endforeach
                     </select>
                 </div>
