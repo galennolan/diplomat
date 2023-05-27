@@ -64,7 +64,7 @@ class UserController extends Controller
         $save_user= new \App\User;
         $save_user->name=$request->get('username');
         $save_user->email=$request->get('email');
-        $save_user->password=bcrypt('password');
+        $save_user->password=bcrypt($request->get('password'));
         $save_user->area=$request->get('area');
         $save_user->tl=$request->get('tl');
         $save_user->tim=$request->get('tim');
@@ -83,6 +83,7 @@ class UserController extends Controller
         {
             $save_user->assignRole('user');
         }
+        
         $save_user->save();
         Alert::success('Tersimpan','Data Berhasil disimpan');
         return redirect()->route('admin.index');
