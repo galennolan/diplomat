@@ -22,8 +22,15 @@ class UserController extends Controller
         $user = \App\User::select('users.id', 'users.name', 'users.email', 'users.area', 'users.tim', 'c.name AS teamleader')
         ->leftJoin('users AS b', 'b.tl', '=', 'users.id')
         ->leftJoin('users AS c', 'c.id', '=', 'users.tl');
-    
 
+        $usertl = \App\User::select('users.id', 'users.name','users.tim')
+        ->whereHas('roles', function ($query) {
+            $query->where('name', 'TL','tim');
+        })
+        ->get();
+
+
+        $role = Role::findByName('TL');
         if (auth()->user()->hasRole('TL')) {
             $user->where('users.tim', '=', auth()->user()->tim)->whereNotIn('users.id', [1, 3]);
         }elseif(auth()->user()->hasRole('adminarea')) {
@@ -32,8 +39,7 @@ class UserController extends Controller
         $user = $user->groupBy('users.id')->get();
 
         return view('admin.user', [
-            'user' => $user,
-        ]);
+            'user' => $user, 'role' => $role,  'usertl' =>$usertl     ]);
 
     }
 
@@ -58,8 +64,9 @@ class UserController extends Controller
         $save_user= new \App\User;
         $save_user->name=$request->get('username');
         $save_user->email=$request->get('email');
-        $save_user->password=bcrypt('password');
+        $save_user->password=bcrypt($request->get('password'));
         $save_user->area=$request->get('area');
+        $save_user->tl=$request->get('tl');
         $save_user->tim=$request->get('tim');
         if($request->get('roles')=='ADMIN'){
             $save_user->assignRole('admin');
@@ -76,6 +83,7 @@ class UserController extends Controller
         {
             $save_user->assignRole('user');
         }
+        
         $save_user->save();
         Alert::success('Tersimpan','Data Berhasil disimpan');
         return redirect()->route('admin.index');

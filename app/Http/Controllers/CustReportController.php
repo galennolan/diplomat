@@ -6,6 +6,7 @@ use App\User;
 use App\Customer;
 use Illuminate\Http\Request;
 use DB;
+use Carbon\Carbon;
 use RealRashid\SweetAlert\Facades\Alert;
 use Auth;
 
@@ -29,7 +30,7 @@ class CustReportController  extends Controller
     public function index()
     {   
         $customer = \App\Customer::all();
-
+         $last30Days = Carbon::now()->subDays(30)->toDateTimeString();
         $isAdminArea = Auth::user()->hasRole('adminarea');
         $area = Auth::user()->area;
 
@@ -44,6 +45,7 @@ class CustReportController  extends Controller
         ->when(Auth::user()->hasRole('adminarea'), function ($query) {
             return $query->where('customer.area', Auth::user()->area);
         })
+        ->where('customer.created_at', '>=', $last30Days)
         ->select('venue', DB::raw("
             CASE
                 WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild','Diplomat Mild', 'Diplomat Mild Menthol') THEN 
@@ -98,6 +100,7 @@ class CustReportController  extends Controller
         
         $venue = DB::table('customer')
         ->whereIn('venue', ['C&B', 'KANTOR', 'PA', 'PT', 'PUSAT PEMBELANJAAN', 'SC'])
+        ->where('customer.created_at', '>=', $last30Days)
         ->where(function ($query) {
             $query->whereIn('rokok', ['Diplomat Mild', 'Diplomat Mild Menthol'])
                   ->orWhereIn('rokok', ['Pro Mild', 'LA Light', 'Class Mild', 'A Mild'])
@@ -129,8 +132,10 @@ class CustReportController  extends Controller
         $umur = DB::table('customer')
             ->select('umur', DB::raw('COUNT(*) as count'), DB::raw('(SELECT SUM(count) FROM (SELECT COUNT(*) as count FROM customer GROUP BY umur) as counts) as total_count'))
             ->leftJoin('users', 'users.id', '=', 'customer.id_user')
+            ->where('customer.created_at', '>=', $last30Days)
         ->when(Auth::user()->hasRole('adminarea'), function ($query) {
                               return $query->where('customer.area', Auth::user()->area);
+                              
                           })
             ->groupBy('umur')
             ->get();
@@ -139,6 +144,7 @@ class CustReportController  extends Controller
         ->select('pekerjaan', DB::raw('COUNT(*) as jml_pekerjaan'))
         ->groupBy('pekerjaan')
         ->leftJoin('users', 'users.id', '=', 'customer.id_user')
+        ->where('customer.created_at', '>=', $last30Days)
         ->when(Auth::user()->hasRole('adminarea'), function ($query) {
                               return $query->where('customer.area', Auth::user()->area);
                           })
@@ -146,26 +152,31 @@ class CustReportController  extends Controller
 
         $rokoknya = ['Diplomat Mild', 'Diplomat Mild Menthol', 'Pro Mild', 'LA Light', 'Class Mild', 'A Mild'];
 
-        $merklain = DB::table('customer')
-            ->select(DB::raw("CASE WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild','Diplomat Mild', 'Diplomat Mild Menthol') THEN rokok ELSE 'Others' END as rokok"), 
-                DB::raw('COUNT(*) as count_others '))
-            ->whereIn('rokok', $rokoknya)
-            ->orWhereNotIn('rokok', $rokoknya)
-            ->leftJoin('users', 'users.id', '=', 'customer.id_user')
-            ->when(Auth::user()->hasRole('adminarea'), function ($query) {
-                return $query->where('customer.area', Auth::user()->area);
-            })
-            ->groupBy(DB::raw("
-            CASE 
-                WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild', 'Diplomat Mild', 'Diplomat Mild Menthol') THEN rokok 
-                ELSE 'Others' 
-            END,
-            CASE 
-                WHEN rokok IN ('Pro Mild', 'LA Light', 'Class Mild', 'A Mild', 'Diplomat Mild', 'Diplomat Mild Menthol') THEN rokok 
-                ELSE 'Others' 
-            END <> 'Others'
-        "))
-            ->get();
+        $subquery = DB::query()
+        ->select(DB::raw("CASE WHEN rokok IN ('Diplomat Mild', 'Diplomat Mild Menthol', 'Pro Mild', 'LA Light', 'Class Mild', 'A Mild') THEN rokok ELSE 'Others' END AS rokok"))
+        ->from('customer')
+        ->where('created_at', '>=', $last30Days)
+        ->fromSub(function ($query) {
+            $query->from('customer');
+        }, 'subquery');
+    
+    $merklain = DB::table(DB::raw("({$subquery->toSql()}) as subquery"))
+        ->mergeBindings($subquery)
+        ->select('rokok', DB::raw('COUNT(*) as count_others'))
+        ->groupBy('rokok')
+        ->get();
+    
+
+$sumOthers = $merklain->where('rokok', 'Others')->sum('count_others');
+
+$merklain = $merklain->reject(function ($row) {
+    return $row->rokok == 'Others';
+});
+
+$merklain->push((object)['rokok' => 'Others', 'count_others' => $sumOthers]);
+
+
+
         
        
 

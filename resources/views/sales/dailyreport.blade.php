@@ -48,9 +48,11 @@
             <th>Tgl</th>
             <th>Nama</th>
             <th>Tim</th>
-            <th>CC <small  style="font-size: 10px"> Target {{$targetcc}} </small></th>
-            <th>ECC<small  style="font-size: 10px"> Target {{$targetecc}}</small></th></th>
-            <th>Pack Selling<small  style="font-size: 10px"> Target {{$targetcc}}</small></th></th>
+            <th>CC <small  style="font-size: 7px"> Target {{$targetcc}} </small></th>
+            <th>ECC<small  style="font-size: 7px"> Target {{$targetecc}}</small></th></th>
+            <th>Pack Selling<small  style="font-size: 7px"> Target {{$targetcc}}</small></th></th>
+            <th>Pack Selling <small  style="font-size: 10px"> Diplomat Mild</small></th>
+            <th>Pack Selling <small  style="font-size: 10px"> Diplomat Mild Menthol</small></th>
             
         </tr>
         </thead>
@@ -86,6 +88,8 @@
                     <i class="fas fa-arrow-up text-success"></i>
             @endif
             {{ $cust->packsell }}</td>
+            <td>{{ $cust->packselldm  }}</td>
+            <td>{{ $cust->packsellDMM   }}</td>
            
             
         </tr>
@@ -96,10 +100,14 @@
             $total_cc = 0;
             $total_ecc = 0;
             $total_pack = 0;
+            $total_packdm = 0;
+            $total_packdmm = 0;
             foreach ($customer as $cust) {
                 $total_cc += $cust->CC;
                 $total_ecc += $cust->ECC;
                 $total_pack += $cust->packsell;
+                $total_packdm += $cust->packselldm;
+                $total_packdmm += $cust->packsellDMM;
             }
         @endphp
         <tr>
@@ -107,6 +115,8 @@
             <td><strong>{{ $total_cc }}</strong></td>
             <td><strong>{{ $total_ecc }}</strong></td>
             <td><strong>{{ $total_pack }}</strong></td>
+            <td><strong>{{ $total_packdm }}</strong></td>
+            <td><strong>{{ $total_packdmm }}</strong></td>
         </tr>
     </tfoot>
     </table>
@@ -356,30 +366,44 @@ function fetchData() {
     const ccData = {!! $ccData !!};
 const eccData = {!! $eccData !!};
 const packData = {!! $packData !!};
+const packDatadm = {!! $packDatadm !!};
+const packDatadmm = {!! $packDatadmm !!};
 const createdDate = {!! $createdDate !!};
 
 
 const data = {
     labels: createdDate,
     datasets: [{
-        label: 'CC',
-        data: ccData,
-        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-        borderColor: 'rgba(255, 99, 132, 1)',
-        borderWidth: 1
-    }, {
-        label: 'ECC',
-        data: eccData,
-        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 1
-    }, {
-        label: 'Pack Selling',
-        data: packData,
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1
-    }]
+                    label: 'CC',
+                    data: ccData,
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'ECC',
+                    data: eccData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Pack Selling',
+                    data: packData,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Pack Selling Diplomat Mild',
+                    data: packDatadm,
+                    backgroundColor: 'rgba(255, 205, 86, 0.2)',
+                    borderColor: 'rgba(255, 205, 86, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Pack Selling Diplomat Mild Menthol',
+                    data: packDatadmm,
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                }]
 };
 
 const options = {

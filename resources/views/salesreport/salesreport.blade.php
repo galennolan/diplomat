@@ -6,7 +6,9 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
   <h1 class="h2 text-center">Sales Report </h1>
 </div>
-<form id="dailyreport-form" method="POST" action="{{ route('salesreport.penjualan') }}">
+<form id="dailyreport-form" method="GET" action="{{ route('salesreport.penjualan') }}">
+
+
   @csrf <div class="row g-2">
   <div class="col-md-12 mb-3">
                   <div class="form-floating">
@@ -52,9 +54,6 @@
                             <button id="submit-btn" type="submit" class="btn btn-primary">Submit</button>
                     
                                   <a href="{{ route('salesreport.export', ['area' => request()->input('area'), 'tanggalawal' => request()->input('tanggalawal'), 'tanggalakhir' => request()->input('tanggalakhir')]) }}" class="btn btn-success">Export to Excel</a>
-                           
-
-
                         </div>
                
 
@@ -64,7 +63,7 @@
   <div class="card-body">
     <div class="table-responsive">
 
-      <table class="table table-bordered table-striped" id="dataTable" style="font-size: xx-small; width: 100%; color:black">
+      <table class="table table-bordered table-striped"  style="font-size: xx-small; width: 100%; color:black">
         <thead class="thead-dark">
             <tr>
             <th>No</th>
@@ -94,10 +93,10 @@
         </thead>
         <tbody>
                       
-        @php $i=1 @endphp    
+         
         @foreach($customer as $data)
             <tr>
-            <td>{{ $i++ }}</td>
+            <td>{{ $data->row_number }}</td>
             <td>{{ date('d M Y', strtotime($data->created_at)) }}</td>
             <td>{{ $data->area }}</td>
             <td>{{ $data->rayon }}</td>
@@ -122,13 +121,15 @@
             <td>{{ $data->alasan }}</td>
             </tr>
             @endforeach
-
+<!-- Display the pagination links -->
+        
         </tbody>
         </table>
-      
+       
+        <div class="d-flex justify-content-center">
+              {{ $customer->appends(request()->except('page'))->links('vendor.sb') }}
+      </div>
+
+
 </div>
-
-
-
-
 @endsection

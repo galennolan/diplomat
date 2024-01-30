@@ -30,7 +30,7 @@ class ReportEfektivitasController extends Controller
         $targetecc = 120;
         $targetcc = 165;
         $area = [];
-    
+        $last30Days = now()->subDays(30)->toDateTimeString();
         $user = \App\User::All();
         $customer = \App\Customer::All();
 
@@ -43,6 +43,7 @@ class ReportEfektivitasController extends Controller
         ->leftJoin('users', 'users.id', '=', 'customer.id_user')
         ->select(DB::raw('COUNT(customer.id) AS CC, customer.area,COUNT(CASE WHEN customer.jml_beli > 0 THEN customer.id END) AS ECC, SUM(customer.jml_beli) AS packsell, DATE_FORMAT(customer.created_at, "%d/%m") AS created_date, users.tim AS area'))
         ->groupBy(DB::raw('users.tim, DATE_FORMAT(customer.created_at, "%d/%m")'))
+        ->where('customer.created_at', '>=', $last30Days)
         ->orderBy('customer.created_at', 'asc');
 
         if (auth()->user()->hasRole('adminarea')) {
